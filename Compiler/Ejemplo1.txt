@@ -1,0 +1,30 @@
+programa Ejemplo1{
+	func ent FormulaGral(ent A, ent B, ent C, ent Val){
+		var dec X;
+		C=(B * 5 + Val / 4 );
+		si(Val == 0){
+			regresa (X);
+		}
+		si_no{
+			regresa ((- B + raiz(pot(B,2)-4 * A * C))/ (2 * A));
+		}		
+	}
+	
+	Principal{
+		var ent A , B, C;
+		var dec Res1, Res2;
+		A= lee(ent);
+		B= lee(ent);
+		C= lee(ent);
+		Res1 = evalua FormulaGral(A , B , C , 0);
+		Res2 = evalua FormulaGral(A , B , C , 1);
+		pluma : color = rojo;
+		pluma : tamaño = A + B;
+		pluma : abajo;
+		meme : gira Res1 grados;
+		meme : avanza arriba C pasos;
+		meme : avanza izquierda A pasos;
+		meme : avanza abajo B pasos;
+		pluma: arriba; 		
+	}
+}

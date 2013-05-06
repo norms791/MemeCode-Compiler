@@ -1,0 +1,1132 @@
+#include "SymbolTable.h"
+#include "Quadruple.h"
+#include "wchar.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <stack>
+#include <vector>
+
+#define GBL_ENT 0
+#define GBL_DEC 500
+#define GBL_FRA 1000
+#define GBL_LOG 1500
+#define GBL_DIR 2000
+#define LCL_ENT 2500
+#define LCL_DEC 3000
+#define LCL_FRA 3500
+#define LCL_LOG 4000
+#define LCL_DIR 4500
+#define CTE_ENT 5000
+#define CTE_DEC 5500
+#define CTE_FRA 6000
+#define CTE_LOG 6500
+#define CTE_DIR 7000
+#define TMP_ENT 7500
+#define TMP_DEC 8000
+#define TMP_FRA 8500
+#define TMP_LOG 9000
+#define TMP_DIR 9500
+
+
+
+COMPILER MemeCode
+	/*Counters for the variables*/
+	int COUNT_GBL_ENT;
+	int COUNT_GBL_DEC;
+	int COUNT_GBL_FRA;
+	int COUNT_GBL_LOG;
+	int COUNT_GBL_DIR;
+	int COUNT_LCL_ENT;
+	int COUNT_LCL_DEC;
+	int COUNT_LCL_FRA;
+	int COUNT_LCL_LOG;
+	int COUNT_LCL_DIR;
+	int COUNT_TMP_ENT;
+	int COUNT_TMP_DEC;
+	int COUNT_TMP_FRA;
+	int COUNT_TMP_LOG;
+	int COUNT_TMP_DIR;
+	int COUNT_CTE_ENT;
+	int COUNT_CTE_DEC;
+	int COUNT_CTE_FRA;
+	int COUNT_CTE_LOG;
+	int COUNT_CTE_DIR;
+	
+
+    int //types
+        undef, ent, fra, log, dec;
+	int // object kinds
+		var, proc, m_proc;
+	int //operators
+		plus, minus, times, slash, andpersand, pipe, less, gtr, 
+		diff, equ, isequ, false_f;
+	
+	int //operation codes
+		ADD, SUB, MUL, DIV, AND, OR, LSS, GTR, DIF, ASIG, IS_EQU,
+		GOTO, GOTOV, GOTOF, ERA, GOSUB, RET, mGIRA, mARRIBA,
+		mABAJO, mIZQUIERDA, mDERECHA, mALTO, mESPERA, pARRIBA, 
+		pABAJO, pTAM, pCOLOR, pBORRA, IMPRIME, PARAM, POTENCIA,
+		RAIZ, END, VERIF, LEC;	
+	
+	int //colors
+		AMARILLO, AZUL, CELESTE, MORADO, NARANJA, NEGRO, ROJO,
+		ROSA, VERDE;
+	
+	int //socpes
+		global_s, local_s, temporal_s, constant_s;
+	
+	int  cubo [11][5][5];
+	
+	//Quadruple stuff
+	int program_counter;
+	vector<Quadruple *> listQuadruple;
+	stack<int> pOper;
+	stack<int> pOp;
+	stack<int> pTipos;
+	stack<int> pSaltos;	
+	
+	//Constants tables
+	vector<FraConst *> fraTable;
+	vector<BoolConst *> boolTable;
+	vector<IntegerConst *> entTable;
+	vector<FloatConst *> decTable;
+	vector<DirConst *> dirTable;
+		
+	//Procedures directory stuff
+	vector<Procedure *> procs_dir;	
+
+	void Err(wchar_t* msg) {
+		errors->Error(la->line, la->col, msg);
+	}
+	
+	/*Function that adds a new quadruple to the list of quadurples*/
+	void create_quadruple(int first, int second, int third, int fourth){
+		cout << "Check in quadruple" ;
+		Quadruple *q = new Quadruple(first, second, third, fourth);
+		listQuadruple.push_back(q);
+		program_counter ++;
+		cout << "Checkout quadruple ";
+	}
+	
+	/*Function that updates a quadruple. It receives as parameters the
+	number of a quadruple, the position of the parameter who is gonna be 
+	updated and the  new value*/
+	void update_quadruple(int number, int position, int value){
+		cout << "Check in edit quadruple" << number << " " << position << " " << value ;
+		
+		Quadruple *q = listQuadruple[number];
+		switch (position){
+			case 1: q->first = value; 
+				break;
+			case 2: q->secnd = value;
+				break;
+			case 3: q->third = value;
+				break;
+			case 4: q->fourth = value;
+				break;
+		}
+		cout << "Check out edit quadruple" ;
+	}
+
+	/*Function to add a new element to the procedures directory*/
+	void add_procedure(wchar_t* name, int type){
+		cout << "Add prodecure check in ";
+		Procedure *p = new Procedure(program_counter, name, type);
+		procs_dir.push_back(p);
+		program_counter ++;
+		cout << "Add procedure check out ";
+	}
+
+	/*Function to add a new variable to the current procedure*/
+	void add_variable(wchar_t* name, int type){
+		Procedure *p = procs_dir.back();
+		int dir = get_var_dir(type, local_s);
+		p->add_var(name, type, dir);
+	}
+	
+	void add_parameter(wchar_t* name, int type){
+		Procedure *p = procs_dir.back();
+		int dir = get_var_dir(type, local_s);
+		p->add_param(name, type, dir);
+	}
+	
+	/*Function to set the direction a variable will have*/
+	int get_var_dir(int type, int scope){
+		int dir = 0;
+		switch(scope) {
+			//Global Scope
+			case 0: 
+				switch(type) {
+					case 1:
+						dir = GBL_ENT + COUNT_GBL_ENT;
+						COUNT_GBL_ENT++;
+					break;
+					case 2:
+						dir = GBL_FRA + COUNT_GBL_FRA;
+						COUNT_GBL_FRA++;
+					break;
+					case 3:
+						dir = GBL_LOG + COUNT_GBL_LOG;
+						COUNT_GBL_LOG++;
+					break;
+					case 4:
+						dir = GBL_DEC + COUNT_GBL_DEC;
+						COUNT_GBL_DEC++;
+					break;
+				}
+			break;
+			//Local Scope
+			case 1:
+				switch(type) {
+					case 1:
+						dir = LCL_ENT + COUNT_LCL_ENT;
+						COUNT_LCL_ENT++;
+					break;
+					case 2:
+						dir = LCL_FRA + COUNT_LCL_FRA;
+						COUNT_LCL_FRA++;
+					break;
+					case 3:
+						dir = LCL_LOG + COUNT_LCL_LOG;
+						COUNT_LCL_LOG++;
+					break;
+					case 4:
+						dir = LCL_DEC + COUNT_LCL_DEC;
+						COUNT_LCL_DEC++;
+					break;
+				}	
+			break;
+			//Temporal scope
+			case 2:
+				switch(type) {
+					case 1:
+						dir = TMP_ENT + COUNT_TMP_ENT;
+						COUNT_TMP_ENT++;
+					break;
+					case 2:
+						dir = TMP_FRA + COUNT_TMP_FRA;
+						COUNT_TMP_FRA++;
+					break;
+					case 3:
+						dir = TMP_LOG + COUNT_TMP_LOG;
+						COUNT_TMP_LOG++;
+					break;
+					case 4:
+						dir = TMP_DEC + COUNT_TMP_DEC;
+						COUNT_TMP_DEC++;
+					break;
+				}
+			break;
+			//Constant Scope
+			case 3:
+				switch(type) {
+					case 1:
+						dir = CTE_ENT + COUNT_CTE_ENT;
+						COUNT_CTE_ENT++;
+					break;
+					case 2:
+						dir = CTE_FRA + COUNT_CTE_FRA;
+						COUNT_CTE_FRA++;
+					break;
+					case 3:
+						dir = CTE_LOG + COUNT_CTE_LOG;
+						COUNT_CTE_LOG++;
+					break;
+					case 4:
+						dir = CTE_DEC + COUNT_CTE_DEC;
+						COUNT_CTE_DEC++;
+					break;
+				}
+			break;
+		}
+		return dir;
+	}
+	
+	void print_procs_dir(){
+		for(int i=0; i<procs_dir.size(); i++ ){
+			cout << procs_dir[i]->first_quadruple << "\n" ; 
+		}
+	}
+	
+	void print_quadruples_file(){
+		ofstream quadruples;
+		quadruples.open("quadruples.txt");
+		
+		/* Formato para las varibles */
+		quadruples << entTable.size() << "," << decTable.size() << "," << boolTable.size() << "," << fraTable.size() << "," << dirTable.size() << "\n";
+		for (int i = 0; i < entTable.size(); i++ )
+			if( i == entTable.size() - 1)
+				quadruples << entTable[i]->value;
+			else
+				quadruples << entTable[i]->value << ",";
+		quadruples << "/";
+		
+		for (int i = 0; i < decTable.size(); i++ )
+			if (i == decTable.size() - 1)
+				quadruples << decTable[i]->value;
+			else 
+				quadruples << entTable[i]->value << ",";
+		quadruples << "/";
+		
+		for (int i = 0; i < boolTable.size(); i++ )
+			if (i == boolTable.size() - 1 )
+				quadruples << boolTable[i]->value;
+			else 
+				quadruples << boolTable[i]->value << ",";
+		quadruples << "/";
+		
+		for (int i = 0; i < fraTable.size(); i++ )
+			if(i == fraTable.size() - 1)
+				quadruples << fraTable[i]->value;
+			else 
+				quadruples << fraTable[i]->value << ",";
+		quadruples << "/";
+		
+		for (int i = 0; i < dirTable.size(); i++ )
+			if (i == dirTable.size() - 1)
+				quadruples << dirTable[i]->value;
+			else 
+				quadruples << dirTable[i]->value << ",";			
+		quadruples << "\n";
+		
+		
+		
+		/* Formato para la memoria global 
+			//VARIABLES  se ponen en orden ent, dec, log, fra, dir
+		*/
+		quadruples << procs_dir[0]->num_ent + procs_dir[0]->num_params_ent << "," << procs_dir[0]->num_dec + procs_dir[0]->num_params_dec << "," <<  procs_dir[0]->num_log + procs_dir[0]->num_params_log << "," << procs_dir[0]->num_fra + procs_dir[0]->num_params_fra << "\n" ; /*QUEDA PEENDIENTE LO DE LAS DIRECCIONESprocs_dir[0]->num_log + procs_dir[0]->num_params_log*/
+		
+		/* Formato para las variables locales y temporales 
+			//La cuarta línea es la memoria local  dentro de la local se separa  VARproc1-TEMPproc1/VARproc2-TEMPproc2/VARproc3-TEMPproc3 
+			1,0,0,0,0-0,0,0,0,0
+		*/
+		for(int i = 1; i < procs_dir.size(); i++)
+			if( i == procs_dir.size() - 1)
+				quadruples << procs_dir[i]->num_ent + procs_dir[i]->num_params_ent << "," << procs_dir[i]->num_dec + procs_dir[i]->num_params_dec << "," <<  procs_dir[i]->num_log + procs_dir[i]->num_params_log << "," << procs_dir[i]->num_fra + procs_dir[i]->num_params_fra << "\n";
+			else
+				quadruples << procs_dir[i]->num_ent + procs_dir[i]->num_params_ent << "," << procs_dir[i]->num_dec + procs_dir[i]->num_params_dec << "," <<  procs_dir[i]->num_log + procs_dir[i]->num_params_log << "," << procs_dir[i]->num_fra + procs_dir[i]->num_params_fra << "/"; 
+		
+		/* Formato para los cuadruplos */
+		for(int i= 0; i < listQuadruple.size(); i++) 
+			if (i == listQuadruple.size() -1)
+				quadruples << listQuadruple[i]->first << "," << listQuadruple[i]->secnd << "," << listQuadruple[i]->third << "," << listQuadruple[i]->fourth ;
+			else 
+				quadruples << listQuadruple[i]->first << "," << listQuadruple[i]->secnd << "," << listQuadruple[i]->third << "," << listQuadruple[i]->fourth << "/";
+		quadruples.close();
+	}
+	
+	void print_quadruples(){
+		for(int i= 0; i < listQuadruple.size(); i++) {
+			cout << listQuadruple[i]->first << " " << listQuadruple[i]->secnd << " " << listQuadruple[i]->third << " " << listQuadruple[i]->fourth << "; \n" ;
+		}
+	}
+	
+	void initDeclarations(){
+		// object kinds
+		var = 0; proc = 1; m_proc = 2;
+		//Códigos de variables
+		undef = 0; ent = 1; fra = 2; log = 3; dec = 4;
+		//operators
+		plus = 0; minus = 1; times = 2; slash = 3; andpersand = 4;
+		pipe = 5; less = 6; gtr = 7; diff = 8; equ = 9; isequ = 10;
+		false_f = 11;
+		//operation codes
+		ADD = 0; SUB = 1; MUL = 2; DIV = 3; AND = 4; OR = 5; LSS = 6; 
+		GTR = 7; DIF = 8; ASIG = 9; IS_EQU = 10; GOTO = 11; GOTOV = 12;
+		GOTOF = 13, ERA = 14; GOSUB = 15; RET = 16; mGIRA = 17; mARRIBA = 18;
+		mABAJO = 19; mIZQUIERDA = 20; mDERECHA = 21; mALTO= 22; mESPERA = 23;
+		pARRIBA = 24; pABAJO = 25; pTAM = 26; pCOLOR = 27; pBORRA = 28; 
+		IMPRIME = 29; PARAM = 30; POTENCIA = 31; RAIZ = 32; END = 33;
+		VERIF = 34; LEC = 35;
+		//scopes
+		global_s = 0; local_s = 1; temporal_s = 2; constant_s = 3;
+		//colors
+		AMARILLO = 1; AZUL = 2; CELESTE = 3; MORADO = 4; NARANJA = 5;
+		NEGRO = 6; ROJO = 7; ROSA = 8; VERDE = 9;
+		//program counter
+		program_counter = 0;
+		//LLENADO DEL CUBO
+		for (int i = 0; i < 11; i++ ) {
+			for (int j = 0; j < 5; j++ ) {
+				for (int k = 0; k < 5; k++) {
+					cubo[i][j][k] = 0;
+				}
+			}
+		}
+		cubo[0][1][1] = 1; cubo[0][1][4] = 4; cubo[0][4][1] = 4; cubo[0][4][4] = 4;
+		cubo[1][1][1] = 1; cubo[1][1][4] = 4; cubo[1][4][1] = 4; cubo[1][4][4] = 4;
+		cubo[2][1][1] = 1; cubo[2][1][4] = 4; cubo[2][4][1] = 4; cubo[2][4][4] = 4;
+		cubo[3][1][1] = 1; cubo[3][1][4] = 4; cubo[3][4][1] = 4; cubo[3][4][4] = 4;
+		cubo[4][1][1] = 3; cubo[4][3][3] = 3;
+		cubo[5][3][3] = 3; 
+		cubo[6][1][1] = 3; cubo[6][1][4] = 3; cubo[6][4][1] = 3; cubo[6][4][4] = 3;
+		cubo[7][1][1] = 3; cubo[7][1][4] = 3; cubo[7][4][1] = 3; cubo[7][4][4] = 3;
+		cubo[8][1][1] = 3; cubo[8][1][4] = 3; cubo[8][4][1] = 3; cubo[8][4][4] = 3;
+		cubo[8][2][2] = 3; cubo[8][3][3] = 3;
+		cubo[9][1][1] = 1; cubo[9][2][2] = 2; cubo[9][3][3] = 3; cubo[9][4][4] = 4;
+		cubo[10][1][1] = 3; cubo[10][2][2] = 3; cubo[10][3][3] = 3; cubo[10][4][4] = 3;
+	}
+
+CHARACTERS
+dig = '0'..'9'.
+lmin = 'a'..'z'.
+lmay = 'A'..'Z'.
+cc = ANY.
+TOKENS
+ent = dig {dig}.
+dec = dig {dig} '.' dig {dig}.
+log = ("true") | ("false").
+fra = '\"' cc {cc} '\"'.
+id = lmay {lmin | lmay | dig}.
+
+COMMENTS FROM "/*" TO "*/" NESTED
+COMMENTS FROM "//" TO '\r' '\n'
+
+IGNORE '\r' + '\n' + '\t'
+
+PRODUCTIONS
+MemeCode = 				(. wchar_t* name; int type; initDeclarations();.)
+	"programa"	    	(. type = 5; .)
+	Ident<name>	    	(. cout << "Entre al programa! " ;
+							/*Create the main procedure*/
+							add_procedure(name, proc);
+						.)
+	"{"					(.
+							/*Here starts the programs procedure quadruple*/
+							Procedure *p = procs_dir.back();
+							p->first_quadruple = program_counter;
+						.)
+	{               
+	DECLARACION
+	}
+	{
+	METODO
+	}
+	PRINCIPAL
+					(. 
+						print_procs_dir(); 
+						print_quadruples_file();
+					.)
+	"}".
+/*******************************************************************/
+ESTATUTO =
+    CICLO
+    | CONDICION
+    | MOVIMIENTO
+    | ASIGLEC
+    | RETORNO
+    | PLUMA.
+/******************************************************************/	
+Ident<wchar_t* &name>
+	= id				(. name= coco_string_create(t->val); .).
+/******************************************************************/	
+PRINCIPAL = 			(. wchar_t* name; .)
+    Ident<name>			(. cout << "Check in principal"; 
+							if (coco_string_equal(name, L"Principal")){
+								add_procedure(name, m_proc); 
+							} else {
+								Err(L"Debe existir un metodo principal y parece que tu no lo tienes...");
+								exit(1);
+							}	
+						.)
+    "{"					(.
+							/*Here starts the main procedure quadruple*/
+							Procedure *p = procs_dir.back();
+							p->first_quadruple = program_counter;
+						.)
+	{           
+    DECLARACION
+    }
+    {
+    ESTATUTO
+    }
+    "}"					(.
+							print_quadruples();
+						.)	
+	.
+/*******************************************************************/	
+METODO =
+    "func"  			(. wchar_t* name; int type;.)
+    TIPO<type>
+    Ident<name>			(. cout << "Check in Metodo ";
+							add_procedure(name, type); .)
+    "("     
+    [
+    DECLARACIONMETODO
+    {
+    ","
+    DECLARACIONMETODO
+    }
+    ]
+    ")"					(.
+							/*Here starts the method procedure quadruple*/
+							Procedure *p = procs_dir.back();
+							p->first_quadruple = program_counter;
+						.)
+    "{"
+	{
+    DECLARACION
+    }
+    {
+    ESTATUTO
+    }
+    "}"
+	.
+/****************************************************************/	
+DECLARACIONMETODO = 	(. cout << "Check in declaracion metodo ";
+							wchar_t* name; int type;  .)
+    TIPO<type>
+    Ident<name>			(. 
+							add_parameter(name, type); .).
+/****************************************************************/
+DECLARACION =			(. cout << "Check in declaracion variable ";
+							wchar_t* name; int type; .)
+     [
+     "lista"
+     "con"
+     EXP
+     ]
+     "var"				
+     TIPO<type>
+     Ident<name>		(. cout << "Add a new variable ";
+							add_variable(name, type); .)
+     {
+     ","
+    Ident<name>			(. cout << "Add a new variable 2";
+							add_variable(name, type); .)
+     }
+     ";".
+/*******************************************************************/	 
+RETORNO = "regresa" "(" SUPEXPRESION ")" ";".
+/*******************************************************************/
+ASIGLEC = 				(. wchar_t* name; .)
+	Ident<name> 		(. /*Buscar la variable en el scope actual*/
+							
+						.)
+	["[" ent "]"] 
+	"=" 
+	(					(. int typeLec; .)
+	LECTURA<typeLec>	(. /*Generar cuadruplo para la lectura*/
+						
+						.) 
+	| ASIGNA
+	).
+/*******************************************************************/	
+LECTURA<int &typeLec> = (. int type; .)
+	"lee" 
+	"(" 
+	TIPO<type> 			(. typeLec = type; .)
+	")" 
+	";".
+/******************************************************************/	
+ASIGNA = (SUPEXPRESION | LLAMADA)";".
+/******************************************************************/
+LLAMADA = 
+	"evalua"			(. wchar_t* name; .) 
+	Ident<name> 		
+	"(" 
+	[
+	SUPEXPRESION
+	{
+	"," 
+	SUPEXPRESION
+	}
+	]
+	")"					(.
+							/*Buscar en el directorio de procedimientos para ver si la funcion existe*/
+							for ( int i = 0; i < procs_dir.size(); i++ ) { 
+								Procedure *p = procs_dir[i];
+								if(coco_string_equal(name, p->name)){
+									/*Si encontro el directorio de procedimiento, generar los cuadruplos necesarios*/
+									create_quadruple(ERA, p->id, -1, -1);
+									for ( int i = 0; i < p->params.size(); i++ ) {
+										if(p->params[i]->type == pTipos.top() ){
+											pTipos.pop();
+											create_quadruple(PARAM, pOp.top(), -1, -1);
+											pOp.top();
+										} else {
+											Err(L"Al parecer hubo un error con los parametros");
+											exit(1);
+										}
+									}
+									create_quadruple(GOSUB, p->first_quadruple, -1, -1);
+									break;
+								} else if ( i ==  procs_dir.size() -1) {
+									/*No lo encontro, hay que marcar un error indicando que el procedimiento no esta*/
+									Err(L"El procedimiento que quieres llamar no ha sido declarado ");
+									exit(1);
+								}
+							}
+						.).
+/******************************************************************/	
+TERM = 				(. cout << "check in term"; .)
+	FACTOR 			(.
+					if( !(pOper.empty()) && ( pOper.top() == times || 
+					pOper.top() == slash )) {
+						int el3 = pTipos.top();
+						pTipos.pop();
+						int el2 = pTipos.top();
+						pTipos.pop();
+						int el1 = pOper.top();
+						pOper.pop();
+						/*Check if the operation is possible and if it is, generate the quadruple*/
+						int result = cubo[el1][el2][el3];
+						int dir = 0;
+						int op2 = pOp.top();
+						pOp.pop();
+						int op1 = pOp.top();
+						pOp.pop();
+						cout << "Todo bien hasta aqui";
+						if(result != 0){
+							dir = get_var_dir(result, temporal_s);
+							switch (el1) {
+								case 2: create_quadruple(MUL, op1, op2, dir);	
+									break;
+								case 3: create_quadruple(DIV, op1, op2, dir);
+									break;
+							}
+							/*Incrementar el numero de temporales del procedimeinto dependiendo del tipo*/
+							Procedure *p = procs_dir.back();
+							switch (result) {
+								case 0: p->num_tem_ent ++;
+									break;
+								case 4: p->num_tem_dec ++;
+									break;		
+							}
+							pOp.push(dir);
+							pTipos.push(result);
+						} else {
+							Err(L"La operacion no puede ser realizada, revisa los tipos de variables");
+							exit(1);
+						}
+					}
+					.)					
+	[
+	(
+	"*" 			(. pOper.push(times); .)	
+	TERM
+	)
+	|
+	(
+	"/" 			(. pOper.push(slash); .)
+	TERM
+	)
+	]				(. cout << "checkout term"; .).
+/******************************************************************/	
+TIPO<int &type>
+    =   		        (. type = undef;.)
+    "ent"       		(. type = ent;.)
+    |"dec"      		(. type = dec;.)
+    |"log"    		 	(. type = log;.).
+/*****************************************************************/	
+VAR = 
+	(
+	[
+	"+"
+	|
+	"-"
+	] 
+	(					(. wchar_t* name; .)
+	Ident<name>			(.
+							/*Obtener las variables del procedimiento actual para buscar los identificadores y meter los tipos y las direcciones*/
+							Procedure *p = procs_dir.back();
+							for ( int i = 0; i < p->variables.size(); i++ ) {
+								Variable *v = p->variables[i];
+								if(coco_string_equal(name, v->name)){
+									pOp.push(v->dir);									
+									cout << "Meti en la pila de op el valor " << v->dir;
+									pTipos.push(v->type);
+									break;
+								}else if (i == p->variables.size() -1){
+									Err(L"Parece que la variable no ha sido declarada ");
+									exit(1);
+								}
+							}
+								
+						.)
+	|					(.int value; .)
+	ent					(.swscanf(t->val, L"%d", &value);
+							/*Validar que el arreglo no este vacio, si esta vacio agregarlo sin buscar*/
+							if( !entTable.empty() ) {
+								/*Buscar el elemento en la tabla de constantes enteras para ver si no lo han agregado*/
+								for(int i = 0; i < entTable.size(); i++){	
+									IntegerConst *ic = entTable[i];
+									if(ic->value == value){
+										pOp.push(ic->dir);
+										pTipos.push(ent);
+										break;
+									} else if (i == entTable.size()-1) {
+										/*No existe, hay que agregarla*/
+										int dir = get_var_dir(constant_s, ent);
+										IntegerConst *nic = new IntegerConst(dir, value);
+										entTable.push_back(nic);
+										pOp.push(dir);
+										pTipos.push(ent);
+									}
+								}
+							} else {
+								int dir = get_var_dir(constant_s, ent);
+								IntegerConst *nic = new IntegerConst(dir, value);
+								entTable.push_back(nic);
+								pOp.push(dir);
+								pTipos.push(ent);
+							}	
+						.)
+	|					(. float value; .)
+	dec					(. swscanf(t->val, L"%f", &value);
+							/*Validar que el arreglo no este vacio, si esta vacio agregarlo sin buscar*/
+							if( !decTable.empty() ) {	
+								/*Buscar el elemento en la tabla de constantes decimales para ver si no lo han agregado*/
+								for(int i = 0; i < decTable.size(); i++){	
+									FloatConst *fc = decTable[i];
+									if(fc->value == value){
+										pOp.push(fc->dir);
+										pTipos.push(dec);
+										break;
+									} else if (i == decTable.size()-1) {
+										/*No existe, hay que agregarla*/
+										int dir = get_var_dir(constant_s, dec);
+										FloatConst *nfc = new FloatConst(dir, value);
+										decTable.push_back(nfc);
+										pOp.push(dir);
+										pTipos.push(dec);
+									}
+								}
+							} else {
+								/*No existe, hay que agregarla*/
+								int dir = get_var_dir(constant_s, dec);
+								FloatConst *nfc = new FloatConst(dir, value);
+								decTable.push_back(nfc);
+								pOp.push(dir);
+								pTipos.push(dec);
+							}	
+						.)
+	)
+	)
+	|					(. bool value; .) 
+	Log<value>			(.
+							if( !boolTable.empty() ) {	
+								/*Buscar el elemento en la tabla de constantes logicas para ver si no lo han agregado*/
+								for(int i = 0; i < boolTable.size(); i++){	
+									BoolConst *bc = boolTable[i];
+									if(bc->value == value){
+										pOp.push(bc->dir);
+										pTipos.push(log);
+										break;
+									} else if (i == boolTable.size()-1) {
+										/*No existe, hay que agregarla*/
+										int dir = get_var_dir(constant_s, log);
+										BoolConst *nbc = new BoolConst(dir, value);
+										boolTable.push_back(nbc);
+										pOp.push(dir);
+										pTipos.push(log);
+									}
+								}
+							} else {
+								/*No existe, hay que agregarla*/
+								int dir = get_var_dir(constant_s, log);
+								BoolConst *nbc = new BoolConst(dir, value);
+								boolTable.push_back(nbc);
+								pOp.push(dir);
+								pTipos.push(log);
+							}	
+						.) 
+	|					(. wchar_t* value; .) 
+	Fra<value>			(.
+							if( !fraTable.empty() ) {	
+								/*Buscar el elemento en la tabla de constantes logicas para ver si no lo han agregado*/
+								for(int i = 0; i < fraTable.size(); i++){	
+									FraConst *frc = fraTable[i];
+									if(coco_string_equal(value, frc->value)){
+										pOp.push(frc->dir);
+										pTipos.push(fra);
+										break;
+									} else if (i == fraTable.size()-1) {
+										/*No existe, hay que agregarla*/
+										int dir = get_var_dir(constant_s, fra);
+										FraConst *nfrc = new FraConst(dir, value);
+										fraTable.push_back(nfrc);
+										pOp.push(dir);
+										pTipos.push(fra);
+									}
+								}
+							} else {
+								/*No existe, hay que agregarla*/
+								int dir = get_var_dir(constant_s, fra);
+								FraConst *nfrc = new FraConst(dir, value);
+								fraTable.push_back(nfrc);
+								pOp.push(dir);
+								pTipos.push(fra);
+							}	
+						.).
+/******************************************************************/	
+Log<bool &value> =
+		log				(. if(coco_string_equal(coco_string_create(t->val), L"false")){
+								value = false;	
+							} else {
+								value = true;
+							} .).
+/******************************************************************/	
+Fra<wchar_t* &value> =
+		fra				(. value = coco_string_create(t->val); .).							
+/******************************************************************/	
+EXPRESION = 			(. cout << "Checkin expression"; .)
+	EXP 
+	[("<" 				(. pOper.push(less); .)
+	| ">" 				(. pOper.push(gtr); .)
+	| "<>" 				(. pOper.push(diff); .)
+	| "=="				(. pOper.push(isequ); .)
+	) EXP				(.
+						if( !(pOper.empty()) && (pOper.top() == less || 
+								pOper.top() == gtr ||  pOper.top() == diff || pOper.top() == isequ )) {
+							int el3 = pTipos.top();
+							pTipos.pop();
+							int el2 = pTipos.top();
+							pTipos.pop();
+							int el1 = pOper.top();
+							pOper.pop();
+							/*Check if the operation is possible and if it, generate the quadruple*/
+							int result = cubo[el1][el2][el3];
+							int dir = 0;
+							int op2 = pOp.top();
+							pOp.pop();
+							int op1 = pOp.top();
+							pOp.pop();
+							if(result != 0){
+								dir = get_var_dir(result, temporal_s);
+								switch (el1) {
+									case 6: create_quadruple(LSS, op1, op2, dir);
+										break;
+									case 7: create_quadruple(GTR, op1, op2, dir);
+										break;	
+									case 8: create_quadruple(DIF, op1, op2, dir);
+										break;
+									case 10: create_quadruple(IS_EQU, op1, op2, dir);
+										break;
+								}
+								/* Incrementar el tipo de temporales solicitado*/
+								Procedure *p = procs_dir.back();
+								p->num_tem_log ++;
+								pOp.push(dir);
+								pTipos.push(result);
+							}else{
+								Err(L"La operacion no se puede realizar");
+								exit(1);
+							}
+						} 
+						.)
+	]					(. cout << "Checkout Expression"; .).
+/******************************************************************/
+EXP = 					(. cout << "Checkin EXP"; .)
+	TERM 				(. 
+						if( !(pOper.empty()) && (pOper.top() == plus || 
+						pOper.top() == minus )) {
+							int el3 = pTipos.top();
+							pTipos.pop();
+							int el2 = pTipos.top();
+							pTipos.pop();
+							int el1 = pOper.top();
+							pOper.pop();
+							/*Check if the operation is possible and if it, generate the quadruple*/
+							int result = cubo[el1][el2][el3];
+							int dir = 0;
+							int op2 = pOp.top();
+							pOp.pop();
+							int op1 = pOp.top();
+							pOp.pop();
+							if(result != 0){
+								dir = get_var_dir(result, temporal_s);
+								switch (el1){
+									case 0: create_quadruple(ADD, op1, op2, dir);
+										break;
+									case 1: create_quadruple(SUB, op1, op2, dir);
+										break;
+								}
+								pOp.push(dir);
+								pTipos.push(result);
+								/*undef = 0; ent = 1; fra = 2; log = 3; dec = 4;*/
+								/* Incrementar el numero de temporales solicitados en el procedimiento */
+								Procedure *p = procs_dir.back();
+								switch (result) {
+									case 0: p->num_tem_ent ++;
+										break;
+									case 4: p->num_tem_dec ++;
+										break;		
+								}
+							}else{
+								Err(L"La operacion no se puede realizar");
+								exit(1);
+							}
+						} 
+						.)
+	[("+" 				(. pOper.push(plus); .)
+	| "-"				(. pOper.push(minus); .)
+	) EXP
+	]					(. cout << "checkout EXP"; .).
+/******************************************************************/
+SUPEXPRESION = 
+	EXPRESION 
+	[
+	("&"				(. pOper.push(andpersand); .)
+	|"|"				(. pOper.push(pipe); .)
+	)
+	EXPRESION
+						(.
+						if( !(pOper.empty()) && (pOper.top() == andpersand || 
+						pOper.top() == pipe )) {
+							int el3 = pTipos.top();
+							pTipos.pop();
+							int el2 = pTipos.top();
+							pTipos.pop();
+							int el1 = pOper.top();
+							pOper.pop();
+							/*Check if the operation is possible and if it, generate the quadruple*/
+							int result = cubo[el1][el2][el3];
+							int dir = 0;
+							int op2 = pOp.top();
+							pOp.pop();
+							int op1 = pOp.top();
+							pOp.pop();
+							if(result != 0){
+								dir = get_var_dir(result, temporal_s);
+								switch (el1) {
+									case 4 : create_quadruple(AND, op1, op2, dir);
+										break;
+									case 5 : create_quadruple(OR, op1, op2, dir);
+										break;	
+								}
+								pOp.push(dir);
+								pTipos.push(result);
+								/*undef = 0; ent = 1; fra = 2; log = 3; dec = 4;*/
+								/* Incrementar el numero de temporales solicitados en el procedimiento */
+								Procedure *p = procs_dir.back();
+								p->num_tem_log ++;
+							}else{
+								Err(L"La operacion no se puede realizar");
+								exit(1);
+							}
+						}
+						.)
+	].
+/******************************************************************/
+COLOR<int &numColor> = 
+	( "negro"			(. numColor = NEGRO; .)	 
+	| "azul" 			(. numColor = AZUL; .)
+	| "rojo" 			(. numColor = ROJO; .)	
+	| "amarillo" 		(. numColor = AMARILLO; .)
+	| "verde" 			(. numColor = VERDE; .)
+	| "rosa" 			(. numColor = ROSA; .)
+	| "celeste" 		(. numColor = CELESTE; .)
+	| "morado" 			(. numColor = MORADO; .)
+	| "naranja"			(. numColor = NARANJA; .)
+	).
+/******************************************************************/
+PLUMA = 
+	"pluma" ":" 
+	(
+		("color" 
+		"="					(. int numColor; .) 
+		COLOR<numColor>		(. create_quadruple(pCOLOR, numColor, -1, -1); .)) 
+		| ("tamaño" "=" 
+		EXP					(.  
+								int DirTam = pOp.top();
+								pOp.pop();
+								int typeTam = pTipos.top();
+								pTipos.pop();
+								if(typeTam == ent){
+									create_quadruple(pTAM, DirTam, -1, -1);
+								} else {
+									Err(L"El tamanio se espera que sea de tipo entero");
+									exit(1);	
+								}
+							.)
+		) 
+		| ("borra"			(. create_quadruple(pBORRA, -1, -1, -1); .)
+		) 
+		| ("arriba"			(. create_quadruple(pARRIBA, -1, -1, -1); .)
+		) 
+		| ("abajo"			(. create_quadruple(pABAJO, -1, -1, -1); .)
+		)) ";".
+/******************************************************************/
+CICLO = 
+	("repetir" 			(.
+						/*Paso 1 para ciclos*/
+						pSaltos.push(program_counter);
+						.)
+	EXP "veces" 		(.
+						/*Paso 2 para ciclos*/
+						int resultType = pTipos.top();
+						pTipos.pop();
+						int result;
+						if(resultType == ent){
+							result = pOp.top();
+							pOp.pop();
+							create_quadruple(GOTOF, result, -1, -1);
+							pSaltos.push(program_counter);
+						} else {
+							Err(L"Tienes que repetir un numero entero de veces");
+							exit(1);
+						}
+					.)
+	
+	"{" 
+	{ESTATUTO} 
+	"}"				(.
+						/*Paso 3 para ciclos*/
+						int false_dir = pSaltos.top();
+						pSaltos.pop();
+						int ret_dir = pSaltos.top();
+						pSaltos.pop();
+						create_quadruple(GOTO, ret_dir, -1, -1);
+						update_quadruple(false_dir -1, 4, program_counter);
+					.)
+	) 
+	| 
+	("mientras" 	(.
+						/*Paso 1 para ciclos*/
+						pSaltos.push(program_counter);
+					.)
+	SUPEXPRESION 	(.
+						/*Paso 2 para ciclos*/
+						int resultType = pTipos.top();
+						pTipos.pop();
+						int result;
+						if(resultType == log){
+							result = pOp.top();
+							pOp.pop();
+							create_quadruple(GOTOF, result, -1, -1);
+							pSaltos.push(program_counter);
+						} else {
+							Err(L"Los ciclos mientras tienen que tener una expresion logica");
+							exit(1);
+						}
+					.)
+	"{" 
+	{ESTATUTO} 
+	"}"				(.
+						/*Paso 3 para ciclos*/
+						int false_dir = pSaltos.top();
+						pSaltos.pop();
+						int ret_dir = pSaltos.top();
+						pSaltos.pop();
+						create_quadruple(GOTO, ret_dir, -1, -1);
+						update_quadruple(false_dir -1, 4, program_counter);
+					.)	
+	).
+/******************************************************************/
+FACTOR = 				(. cout << "checkin factor"; .)
+	("pot" "(" EXP "," EXP ")")
+	| 
+	(["raiz"] 
+	"("					(. pOper.push(false_f);	.) 
+	EXP
+	")"					(. pOper.pop();
+							cout << "Si quite el parentesis";.)
+	) | VAR				(. cout << "checkout factor"; .).
+/******************************************************************/
+ALTO = "alto" ";".
+/******************************************************************/
+CONDICION = 
+	"si" 
+	"(" SUPEXPRESION ")"(.
+							/*Revisar si el resultado de la expresion es un resultado booleano*/ 
+							int tempR;
+							if(pTipos.top() != log){
+								Err(L"La expresion de la condicion tiene que ser logica");
+								exit(1);
+							}else {
+								pTipos.pop();
+								tempR = pOp.top();
+								pOp.pop();
+								create_quadruple(GOTOF, tempR, -1, -1);
+								pSaltos.push(program_counter -1);
+							}
+						.)
+
+	"{" 
+	{ESTATUTO} 
+	"}" 
+	[					(. 
+							/*El paso 2 para los estatutos condicionales*/
+							create_quadruple(GOTO,-1,-1,-1);
+							int quadruplePosition = pSaltos.top();
+							pSaltos.pop();
+							update_quadruple(quadruplePosition -1, 4, program_counter);
+							pSaltos.push(program_counter -1);
+						.)
+	"si_no" 
+	"{"
+	{ESTATUTO}
+						(.
+							/*Paso 3 para los estatutos condicionales*/
+							int qToUpdate = pSaltos.top();
+							pSaltos.pop();
+							update_quadruple(qToUpdate-1, 4, program_counter);
+						.)
+	"}"].
+/******************************************************************/
+AVANZA = 				(. int tipoMovimiento; .)
+	"avanza" 
+	("arriba" 			(. tipoMovimiento = 0; .) 
+	|"abajo" 			(. tipoMovimiento = 1; .)
+	|"izquierda" 		(. tipoMovimiento = 2; .) 
+	|"derecha"			(. tipoMovimiento = 2; .) 
+	) EXP				(. int tipoAvance = pTipos.top();
+							pTipos.pop();
+						   int dirAvance = pOp.top();
+						   pOp.pop();
+							if(tipoAvance == ent){
+								switch(tipoMovimiento){
+									case 0: create_quadruple(mARRIBA, dirAvance, -1, -1);
+										break;
+									case 1: create_quadruple(mABAJO, dirAvance, -1, -1);
+										break;	
+									case 2: create_quadruple(mIZQUIERDA, dirAvance, -1, -1);
+										break;	
+									case 3: create_quadruple(mDERECHA, dirAvance, -1, -1);
+										break;		
+								}
+							} else {
+								Err(L"Solo puedes moverte un numero entero de pasos");
+								exit(1);
+							}	
+						.)
+	"pasos" ";".
+/******************************************************************/
+GIRA = 
+	"gira" 				(.
+							int tipoGira = pTipos.top(); 
+							pTipos.pop();
+							int dirGira = pOp.top();
+							pOp.pop();
+						.)
+	EXP 				(.
+							if(tipoGira == ent){
+								create_quadruple(mGIRA, dirGira, -1, -1);
+							} else {
+								Err(L"Solo puedes girar un numero entero de grados");
+								exit(1);
+							}
+						.)	
+	"grados" ";".
+/******************************************************************/
+ESPERA = 
+	"espera" 
+	EXP 				(.
+							int tipoEspera = pTipos.top();
+							pTipos.pop();
+							int dirEspera = pOp.top();
+							pOp.pop();
+							if(tipoEspera == ent){
+								create_quadruple(mESPERA, dirEspera, -1, -1);
+							} else {
+								Err(L"Solo puedes esperar una cantidad entera de segundos");
+								exit(1);
+							}
+						.)
+	"segundos" ";".
+/******************************************************************/
+MOVIMIENTO = "meme" ":" (GIRA | AVANZA | ESPERA | ALTO).
+END MemeCode.
