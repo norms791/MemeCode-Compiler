@@ -1,0 +1,13 @@
+programa Ejemplo2 {
+	
+	Principal {
+		pluma: tamaño = 4;
+		pluma: abajo;
+		meme: avanza derecha 4 pasos;
+		meme: avanza abajo 4 pasos;
+		meme: avanza izquierda 4 pasos;
+		meme: avanza arriba 4 pasos;
+		pluma: arriba;
+	}
+
+}

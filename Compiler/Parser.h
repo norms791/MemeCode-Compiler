@@ -15,23 +15,23 @@
 
 #define GBL_ENT 0
 #define GBL_DEC 500
-#define GBL_FRA 1000
-#define GBL_LOG 1500
+#define GBL_LOG 1000
+#define GBL_FRA 1500
 #define GBL_DIR 2000
 #define LCL_ENT 2500
 #define LCL_DEC 3000
-#define LCL_FRA 3500
-#define LCL_LOG 4000
+#define LCL_LOG 3500
+#define LCL_FRA 4000
 #define LCL_DIR 4500
 #define CTE_ENT 5000
 #define CTE_DEC 5500
-#define CTE_FRA 6000
-#define CTE_LOG 6500
+#define CTE_LOG 6000
+#define CTE_FRA 6500
 #define CTE_DIR 7000
 #define TMP_ENT 7500
 #define TMP_DEC 8000
-#define TMP_FRA 8500
-#define TMP_LOG 9000
+#define TMP_FRA 9000
+#define TMP_LOG 8500
 #define TMP_DIR 9500
 
 
@@ -116,7 +116,7 @@ int COUNT_GBL_ENT;
 		ADD, SUB, MUL, DIV, AND, OR, LSS, GTR, DIF, ASIG, IS_EQU,
 		GOTO, GOTOV, GOTOF, ERA, GOSUB, RET, mGIRA, mARRIBA,
 		mABAJO, mIZQUIERDA, mDERECHA, mALTO, mESPERA, pARRIBA, 
-		pABAJO, pTAM, pCOLOR, pBORRA, IMPRIME, PARAM, POTENCIA,
+		pABAJO, pTAM, pCOLOR, pBORRA, PRINT, PARAM, POTENCIA,
 		RAIZ, END, VERIF, LEC;	
 	
 	int //colors
@@ -182,9 +182,8 @@ int COUNT_GBL_ENT;
 	/*Function to add a new element to the procedures directory*/
 	void add_procedure(wchar_t* name, int type){
 		cout << "Add prodecure check in ";
-		Procedure *p = new Procedure(program_counter, name, type);
+		Procedure *p = new Procedure(procs_dir.size(), name, type);
 		procs_dir.push_back(p);
-		program_counter ++;
 		cout << "Add procedure check out ";
 	}
 
@@ -195,10 +194,31 @@ int COUNT_GBL_ENT;
 		p->add_var(name, type, dir);
 	}
 	
+	/*MODIFICAR LAS COSAS DE LOS ARREGLO LOS INDICES!!*/
+	void add_variable_array(wchar_t* name, int type, int arr_length){
+		Procedure *p = procs_dir.back();
+		int dir = get_var_dir(type, local_s);
+		p->add_var_arr(name, type, dir, arr_length);
+	}	
+	
 	void add_parameter(wchar_t* name, int type){
 		Procedure *p = procs_dir.back();
 		int dir = get_var_dir(type, local_s);
 		p->add_param(name, type, dir);
+	}
+	
+	/*Restore the memory counters */
+	void restore_counters () {
+		COUNT_LCL_ENT = 0;
+		COUNT_LCL_DEC = 0;
+		COUNT_LCL_FRA = 0;
+		COUNT_LCL_LOG = 0;
+		COUNT_LCL_DIR = 0;
+		COUNT_TMP_ENT = 0;
+		COUNT_TMP_DEC = 0;
+		COUNT_TMP_FRA = 0;
+		COUNT_TMP_LOG = 0;
+		COUNT_TMP_DIR = 0;
 	}
 	
 	/*Function to set the direction a variable will have*/
@@ -345,7 +365,7 @@ int COUNT_GBL_ENT;
 		/* Formato para la memoria global 
 			//VARIABLES  se ponen en orden ent, dec, log, fra, dir
 		*/
-		quadruples << procs_dir[0]->num_ent + procs_dir[0]->num_params_ent << "," << procs_dir[0]->num_dec + procs_dir[0]->num_params_dec << "," <<  procs_dir[0]->num_log + procs_dir[0]->num_params_log << "," << procs_dir[0]->num_fra + procs_dir[0]->num_params_fra << "\n" ; /*QUEDA PEENDIENTE LO DE LAS DIRECCIONESprocs_dir[0]->num_log + procs_dir[0]->num_params_log*/
+		quadruples << procs_dir[0]->num_ent + procs_dir[0]->num_params_ent << "," << procs_dir[0]->num_dec + procs_dir[0]->num_params_dec << "," <<  procs_dir[0]->num_log + procs_dir[0]->num_params_log << "," << procs_dir[0]->num_fra + procs_dir[0]->num_params_fra << "," << procs_dir[0]->num_dir << "\n" ;
 		
 		/* Formato para las variables locales y temporales 
 			//La cuarta línea es la memoria local  dentro de la local se separa  VARproc1-TEMPproc1/VARproc2-TEMPproc2/VARproc3-TEMPproc3 
@@ -353,16 +373,18 @@ int COUNT_GBL_ENT;
 		*/
 		for(int i = 1; i < procs_dir.size(); i++)
 			if( i == procs_dir.size() - 1)
-				quadruples << procs_dir[i]->num_ent + procs_dir[i]->num_params_ent << "," << procs_dir[i]->num_dec + procs_dir[i]->num_params_dec << "," <<  procs_dir[i]->num_log + procs_dir[i]->num_params_log << "," << procs_dir[i]->num_fra + procs_dir[i]->num_params_fra << "\n";
+				quadruples << procs_dir[i]->num_ent + procs_dir[i]->num_params_ent << "," << procs_dir[i]->num_dec + procs_dir[i]->num_params_dec << "," <<  procs_dir[i]->num_log + procs_dir[i]->num_params_log << "," << procs_dir[i]->num_fra + procs_dir[i]->num_params_fra << "," << procs_dir[i]->num_dir << "-" << procs_dir[i]->num_tem_ent << "," << procs_dir[i]->num_tem_dec << "," << procs_dir[i]->num_tem_log << "," << procs_dir[i]->num_tem_fra << "," << procs_dir[i]->num_tem_dir << "\n";
 			else
-				quadruples << procs_dir[i]->num_ent + procs_dir[i]->num_params_ent << "," << procs_dir[i]->num_dec + procs_dir[i]->num_params_dec << "," <<  procs_dir[i]->num_log + procs_dir[i]->num_params_log << "," << procs_dir[i]->num_fra + procs_dir[i]->num_params_fra << "/"; 
+				quadruples << procs_dir[i]->num_ent + procs_dir[i]->num_params_ent << "," << procs_dir[i]->num_dec + procs_dir[i]->num_params_dec << "," <<  procs_dir[i]->num_log + procs_dir[i]->num_params_log << "," << procs_dir[i]->num_fra + procs_dir[i]->num_params_fra << "," << procs_dir[i]->num_dir << "-" << procs_dir[i]->num_tem_ent << "," << procs_dir[i]->num_tem_dec << "," << procs_dir[i]->num_tem_log << "," << procs_dir[i]->num_tem_fra << "," << procs_dir[i]->num_tem_dir << "/";
 		
 		/* Formato para los cuadruplos */
-		for(int i= 0; i < listQuadruple.size(); i++) {
-			quadruples << listQuadruple[i]->first << "," << listQuadruple[i]->secnd << "," << listQuadruple[i]->third << "," << listQuadruple[i]->fourth << "/" ;
-		}
+		for(int i= 0; i < listQuadruple.size(); i++) 
+			if (i == listQuadruple.size() -1)
+				quadruples << listQuadruple[i]->first << "," << listQuadruple[i]->secnd << "," << listQuadruple[i]->third << "," << listQuadruple[i]->fourth ;
+			else 
+				quadruples << listQuadruple[i]->first << "," << listQuadruple[i]->secnd << "," << listQuadruple[i]->third << "," << listQuadruple[i]->fourth << "/";
+		quadruples.close();
 	}
-	
 	
 	void print_quadruples(){
 		for(int i= 0; i < listQuadruple.size(); i++) {
@@ -385,8 +407,9 @@ int COUNT_GBL_ENT;
 		GOTOF = 13, ERA = 14; GOSUB = 15; RET = 16; mGIRA = 17; mARRIBA = 18;
 		mABAJO = 19; mIZQUIERDA = 20; mDERECHA = 21; mALTO= 22; mESPERA = 23;
 		pARRIBA = 24; pABAJO = 25; pTAM = 26; pCOLOR = 27; pBORRA = 28; 
-		IMPRIME = 29; PARAM = 30; POTENCIA = 31; RAIZ = 32; END = 33;
+		PRINT = 29; PARAM = 30; POTENCIA = 31; RAIZ = 32; END = 33;
 		VERIF = 34; LEC = 35;
+		
 		//scopes
 		global_s = 0; local_s = 1; temporal_s = 2; constant_s = 3;
 		//colors
@@ -432,13 +455,15 @@ int COUNT_GBL_ENT;
 	void CONDICION();
 	void MOVIMIENTO();
 	void ASIGLEC();
+	void IMPRIME();
 	void RETORNO();
 	void PLUMA();
+	void MATH();
+	void EXP();
 	void TIPO(int &type);
 	void DECLARACIONMETODO();
-	void EXP();
 	void SUPEXPRESION();
-	void LECTURA(int &typeLec);
+	void LECTURA();
 	void ASIGNA();
 	void LLAMADA();
 	void TERM();

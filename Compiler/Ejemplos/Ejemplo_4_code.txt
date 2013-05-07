@@ -1,0 +1,19 @@
+programa Ejemplo4 {
+	
+	func ent MueveMeme(ent A, ent B){
+		regresa (A * B);
+	}
+	
+	Principal {
+		var ent A;
+		A = evalua MueveMeme(8, 3);
+		pluma: tamaño = 4;
+		pluma: abajo;
+		meme: avanza derecha A pasos;
+		meme: avanza abajo 4 pasos;
+		meme: avanza izquierda A pasos;
+		meme: avanza arriba 4 pasos;
+		pluma: arriba;
+	}
+
+}

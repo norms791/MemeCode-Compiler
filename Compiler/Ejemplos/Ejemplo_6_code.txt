@@ -1,0 +1,22 @@
+programa Ejemplo5 {
+	func ent Fibonacci(ent D) {
+		var ent A;
+		var ent B;
+		si(D < 2) {
+			regresa (D);
+		} si_no {
+			A = evalua Fibonacci(D - 1 );
+			B = evalua Fibonacci(D - 2 );
+			regresa(A+B);
+		}
+	}
+
+	Principal {
+		var ent A;
+		var ent C;
+		A = lee (ent);
+		C = evalua Fibonacci(A);
+		imprime (C);
+		meme : avanza arriba A pasos;
+	}
+}

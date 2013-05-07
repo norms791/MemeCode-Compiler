@@ -1,0 +1,9 @@
+programa Ejemplo5 {
+	Principal {
+		var ent A;
+		var dec B;
+		A = lee (ent);
+		B = lee (dec);
+		meme : avanza arriba A pasos;
+	}
+}

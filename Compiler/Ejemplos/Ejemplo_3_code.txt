@@ -1,0 +1,11 @@
+programa Ejemplo3{
+	Principal {
+		var ent A;
+		var ent B;
+		pluma : color = rojo;
+		pluma : abajo;
+		meme : avanza arriba 4+10 pasos;
+		meme : avanza abajo 6+12 pasos;
+		meme : avanza abajo 6+12 pasos;
+	}
+}

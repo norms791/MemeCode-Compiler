@@ -18,11 +18,23 @@ class Variable {
 		wchar_t* name;
 		int type;
 		int dir;
+		int is_array;
+		int arr_length;
 		
 		Variable(wchar_t* name, int type, int dir){
 			this->name = name;
 			this->type = type;
 			this->dir = dir;
+			this->is_array = 0;
+			this->arr_length = 0;
+		}
+		
+		Variable(wchar_t* name, int type, int dir, int arr_length){
+			this->name = name;
+			this->type = type;
+			this->dir = dir;
+			this->is_array = 1;
+			this->arr_length = arr_length; 
 		}
 };
 
@@ -96,10 +108,12 @@ class Procedure {
 		int num_fra;
 		int num_log;
 		int num_dec;
+		int num_dir;
 		int num_tem_ent;
 		int num_tem_fra;
 		int num_tem_log;
 		int num_tem_dec;
+		int num_tem_dir;
 		vector<Variable *> params;
 		vector<Variable *> variables;
 		
@@ -112,6 +126,7 @@ class Procedure {
 			this->num_fra = 0;
 			this->num_log = 0;
 			this->num_dec = 0;
+			this->num_dir = 0;
 			this->num_params_ent = 0;
 			this->num_params_fra = 0;
 			this->num_params_log = 0;
@@ -120,6 +135,7 @@ class Procedure {
 			this->num_tem_fra = 0;
 			this->num_tem_log = 0;
 			this->num_tem_dec = 0;
+			this->num_tem_dir = 0;
 		}
 		
 		/*Function to add a new variable in a procedure*/
@@ -138,19 +154,34 @@ class Procedure {
 				case 4: num_dec ++;
 					break;	
 			}
-			
-			
 			cout << "Add variable check out ";
-			
-			
-		}	
+		}
+
+		/*Function to add a new variable in a procedure*/
+		void add_var_arr(wchar_t* name, int type, int dir, int arr_length){
+			cout << "Add variable check in ";
+			/*Create a new variable*/
+			Variable *v = new Variable(name, type, dir, arr_length);
+			variables.push_back(v);
+			switch (type) {
+				case 1: num_ent ++;
+					break;
+				case 2: num_fra ++;
+					break;
+				case 3: num_log ++;
+					break;
+				case 4: num_dec ++;
+					break;	
+			}
+			cout << "Add variable check out ";
+		}		
 		
 		/*Function to add a new variable in a procedure*/
 		void add_param(wchar_t* name, int type, int dir){
 			//cout << "Add parameter check in ";
 			/*Create a new variable*/
 			Variable *v = new Variable(name, type, dir);
-			variables.push_back(v);
+			params.push_back(v);
 			switch (type) {
 				case 1: num_params_ent ++;
 					break;

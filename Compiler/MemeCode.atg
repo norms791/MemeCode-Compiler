@@ -10,23 +10,23 @@
 
 #define GBL_ENT 0
 #define GBL_DEC 500
-#define GBL_FRA 1000
-#define GBL_LOG 1500
+#define GBL_LOG 1000
+#define GBL_FRA 1500
 #define GBL_DIR 2000
 #define LCL_ENT 2500
 #define LCL_DEC 3000
-#define LCL_FRA 3500
-#define LCL_LOG 4000
+#define LCL_LOG 3500
+#define LCL_FRA 4000
 #define LCL_DIR 4500
 #define CTE_ENT 5000
 #define CTE_DEC 5500
-#define CTE_FRA 6000
-#define CTE_LOG 6500
+#define CTE_LOG 6000
+#define CTE_FRA 6500
 #define CTE_DIR 7000
 #define TMP_ENT 7500
 #define TMP_DEC 8000
-#define TMP_FRA 8500
-#define TMP_LOG 9000
+#define TMP_FRA 9000
+#define TMP_LOG 8500
 #define TMP_DIR 9500
 
 
@@ -67,7 +67,7 @@ COMPILER MemeCode
 		ADD, SUB, MUL, DIV, AND, OR, LSS, GTR, DIF, ASIG, IS_EQU,
 		GOTO, GOTOV, GOTOF, ERA, GOSUB, RET, mGIRA, mARRIBA,
 		mABAJO, mIZQUIERDA, mDERECHA, mALTO, mESPERA, pARRIBA, 
-		pABAJO, pTAM, pCOLOR, pBORRA, IMPRIME, PARAM, POTENCIA,
+		pABAJO, pTAM, pCOLOR, pBORRA, PRINT, PARAM, POTENCIA,
 		RAIZ, END, VERIF, LEC;	
 	
 	int //colors
@@ -133,9 +133,8 @@ COMPILER MemeCode
 	/*Function to add a new element to the procedures directory*/
 	void add_procedure(wchar_t* name, int type){
 		cout << "Add prodecure check in ";
-		Procedure *p = new Procedure(program_counter, name, type);
+		Procedure *p = new Procedure(procs_dir.size(), name, type);
 		procs_dir.push_back(p);
-		program_counter ++;
 		cout << "Add procedure check out ";
 	}
 
@@ -146,10 +145,31 @@ COMPILER MemeCode
 		p->add_var(name, type, dir);
 	}
 	
+	/*MODIFICAR LAS COSAS DE LOS ARREGLO LOS INDICES!!*/
+	void add_variable_array(wchar_t* name, int type, int arr_length){
+		Procedure *p = procs_dir.back();
+		int dir = get_var_dir(type, local_s);
+		p->add_var_arr(name, type, dir, arr_length);
+	}	
+	
 	void add_parameter(wchar_t* name, int type){
 		Procedure *p = procs_dir.back();
 		int dir = get_var_dir(type, local_s);
 		p->add_param(name, type, dir);
+	}
+	
+	/*Restore the memory counters */
+	void restore_counters () {
+		COUNT_LCL_ENT = 0;
+		COUNT_LCL_DEC = 0;
+		COUNT_LCL_FRA = 0;
+		COUNT_LCL_LOG = 0;
+		COUNT_LCL_DIR = 0;
+		COUNT_TMP_ENT = 0;
+		COUNT_TMP_DEC = 0;
+		COUNT_TMP_FRA = 0;
+		COUNT_TMP_LOG = 0;
+		COUNT_TMP_DIR = 0;
 	}
 	
 	/*Function to set the direction a variable will have*/
@@ -296,7 +316,7 @@ COMPILER MemeCode
 		/* Formato para la memoria global 
 			//VARIABLES  se ponen en orden ent, dec, log, fra, dir
 		*/
-		quadruples << procs_dir[0]->num_ent + procs_dir[0]->num_params_ent << "," << procs_dir[0]->num_dec + procs_dir[0]->num_params_dec << "," <<  procs_dir[0]->num_log + procs_dir[0]->num_params_log << "," << procs_dir[0]->num_fra + procs_dir[0]->num_params_fra << "\n" ; /*QUEDA PEENDIENTE LO DE LAS DIRECCIONESprocs_dir[0]->num_log + procs_dir[0]->num_params_log*/
+		quadruples << procs_dir[0]->num_ent + procs_dir[0]->num_params_ent << "," << procs_dir[0]->num_dec + procs_dir[0]->num_params_dec << "," <<  procs_dir[0]->num_log + procs_dir[0]->num_params_log << "," << procs_dir[0]->num_fra + procs_dir[0]->num_params_fra << "," << procs_dir[0]->num_dir << "\n" ;
 		
 		/* Formato para las variables locales y temporales 
 			//La cuarta línea es la memoria local  dentro de la local se separa  VARproc1-TEMPproc1/VARproc2-TEMPproc2/VARproc3-TEMPproc3 
@@ -304,9 +324,9 @@ COMPILER MemeCode
 		*/
 		for(int i = 1; i < procs_dir.size(); i++)
 			if( i == procs_dir.size() - 1)
-				quadruples << procs_dir[i]->num_ent + procs_dir[i]->num_params_ent << "," << procs_dir[i]->num_dec + procs_dir[i]->num_params_dec << "," <<  procs_dir[i]->num_log + procs_dir[i]->num_params_log << "," << procs_dir[i]->num_fra + procs_dir[i]->num_params_fra << "\n";
+				quadruples << procs_dir[i]->num_ent + procs_dir[i]->num_params_ent << "," << procs_dir[i]->num_dec + procs_dir[i]->num_params_dec << "," <<  procs_dir[i]->num_log + procs_dir[i]->num_params_log << "," << procs_dir[i]->num_fra + procs_dir[i]->num_params_fra << "," << procs_dir[i]->num_dir << "-" << procs_dir[i]->num_tem_ent << "," << procs_dir[i]->num_tem_dec << "," << procs_dir[i]->num_tem_log << "," << procs_dir[i]->num_tem_fra << "," << procs_dir[i]->num_tem_dir << "\n";
 			else
-				quadruples << procs_dir[i]->num_ent + procs_dir[i]->num_params_ent << "," << procs_dir[i]->num_dec + procs_dir[i]->num_params_dec << "," <<  procs_dir[i]->num_log + procs_dir[i]->num_params_log << "," << procs_dir[i]->num_fra + procs_dir[i]->num_params_fra << "/"; 
+				quadruples << procs_dir[i]->num_ent + procs_dir[i]->num_params_ent << "," << procs_dir[i]->num_dec + procs_dir[i]->num_params_dec << "," <<  procs_dir[i]->num_log + procs_dir[i]->num_params_log << "," << procs_dir[i]->num_fra + procs_dir[i]->num_params_fra << "," << procs_dir[i]->num_dir << "-" << procs_dir[i]->num_tem_ent << "," << procs_dir[i]->num_tem_dec << "," << procs_dir[i]->num_tem_log << "," << procs_dir[i]->num_tem_fra << "," << procs_dir[i]->num_tem_dir << "/";
 		
 		/* Formato para los cuadruplos */
 		for(int i= 0; i < listQuadruple.size(); i++) 
@@ -338,8 +358,9 @@ COMPILER MemeCode
 		GOTOF = 13, ERA = 14; GOSUB = 15; RET = 16; mGIRA = 17; mARRIBA = 18;
 		mABAJO = 19; mIZQUIERDA = 20; mDERECHA = 21; mALTO= 22; mESPERA = 23;
 		pARRIBA = 24; pABAJO = 25; pTAM = 26; pCOLOR = 27; pBORRA = 28; 
-		IMPRIME = 29; PARAM = 30; POTENCIA = 31; RAIZ = 32; END = 33;
+		PRINT = 29; PARAM = 30; POTENCIA = 31; RAIZ = 32; END = 33;
 		VERIF = 34; LEC = 35;
+		
 		//scopes
 		global_s = 0; local_s = 1; temporal_s = 2; constant_s = 3;
 		//colors
@@ -396,7 +417,11 @@ MemeCode = 				(. wchar_t* name; int type; initDeclarations();.)
 	"{"					(.
 							/*Here starts the programs procedure quadruple*/
 							Procedure *p = procs_dir.back();
+							/*Create the quadruple to be modified after creating the main procedure*/
+							create_quadruple(ERA, -1,-1, -1);	
+							create_quadruple(GOSUB, -1, -1, -1);
 							p->first_quadruple = program_counter;
+							
 						.)
 	{               
 	DECLARACION
@@ -406,9 +431,11 @@ MemeCode = 				(. wchar_t* name; int type; initDeclarations();.)
 	}
 	PRINCIPAL
 					(. 
+						create_quadruple(END, -1, -1, -1);	
 						print_procs_dir(); 
 						print_quadruples_file();
 					.)
+					
 	"}".
 /*******************************************************************/
 ESTATUTO =
@@ -416,8 +443,41 @@ ESTATUTO =
     | CONDICION
     | MOVIMIENTO
     | ASIGLEC
+    | IMPRIME
     | RETORNO
     | PLUMA.
+/******************************************************************/
+MATH = 
+	"obtiene" 
+	":"
+	(
+	"raiz"
+	"("				(. int value1; .)
+	ent				(. swscanf(t->val, L"%d", &value1); .)
+	")"				(. create_quadruple(RAIZ, value1, -1, -1);.)
+	)
+	|(
+	"potencia"
+	"("				(. int value1; int value2; .)
+	ent				(. swscanf(t->val, L"%d", &value1); .)
+	","
+	ent				(. swscanf(t->val, L"%d", &value2); .)
+	")"				(. create_quadruple(POTENCIA, value1, value2, -1);.)
+	)
+	";".	
+/******************************************************************/	
+IMPRIME = 
+	"imprime" 
+	"("
+	EXP 
+		")"				(.	
+							int DirImpr = pOp.top();
+							pOp.pop();
+							int typeTam = pTipos.top();
+							pTipos.pop();
+							create_quadruple(PRINT, DirImpr, -1, -1);
+						.)
+	";".
 /******************************************************************/	
 Ident<wchar_t* &name>
 	= id				(. name= coco_string_create(t->val); .).
@@ -425,7 +485,10 @@ Ident<wchar_t* &name>
 PRINCIPAL = 			(. wchar_t* name; .)
     Ident<name>			(. cout << "Check in principal"; 
 							if (coco_string_equal(name, L"Principal")){
-								add_procedure(name, m_proc); 
+								add_procedure(name, m_proc);
+								/*moficar el valor del cuadruplo para decirle donde es el era*/
+								Procedure * p = procs_dir.back();
+								update_quadruple(0, 2, p->id);	
 							} else {
 								Err(L"Debe existir un metodo principal y parece que tu no lo tienes...");
 								exit(1);
@@ -434,7 +497,8 @@ PRINCIPAL = 			(. wchar_t* name; .)
     "{"					(.
 							/*Here starts the main procedure quadruple*/
 							Procedure *p = procs_dir.back();
-							p->first_quadruple = program_counter;
+							p->first_quadruple = program_counter + 1;
+							update_quadruple(1, 2, p->first_quadruple);
 						.)
 	{           
     DECLARACION
@@ -443,8 +507,13 @@ PRINCIPAL = 			(. wchar_t* name; .)
     ESTATUTO
     }
     "}"					(.
-							print_quadruples();
-						.)	
+							p->num_tem_ent = COUNT_TMP_ENT;
+							p->num_tem_dec = COUNT_TMP_DEC;
+							p->num_tem_fra = COUNT_TMP_FRA;
+							p->num_tem_log = COUNT_TMP_LOG;
+							p->num_tem_dir = COUNT_TMP_DIR;
+							restore_counters();		
+						.)			
 	.
 /*******************************************************************/	
 METODO =
@@ -463,7 +532,7 @@ METODO =
     ")"					(.
 							/*Here starts the method procedure quadruple*/
 							Procedure *p = procs_dir.back();
-							p->first_quadruple = program_counter;
+							p->first_quadruple = program_counter +1;
 						.)
     "{"
 	{
@@ -472,26 +541,44 @@ METODO =
     {
     ESTATUTO
     }
-    "}"
+    "}"					(.
+							p->num_tem_ent = COUNT_TMP_ENT;
+							p->num_tem_dec = COUNT_TMP_DEC;
+							p->num_tem_fra = COUNT_TMP_FRA;
+							p->num_tem_log = COUNT_TMP_LOG;
+							p->num_tem_dir = COUNT_TMP_DIR;
+							restore_counters();	
+						.)
 	.
 /****************************************************************/	
 DECLARACIONMETODO = 	(. cout << "Check in declaracion metodo ";
 							wchar_t* name; int type;  .)
     TIPO<type>
     Ident<name>			(. 
-							add_parameter(name, type); .).
+							add_parameter(name, type); 
+							cout << endl << "Checkout declaracion metodo" << endl;
+						.).
 /****************************************************************/
 DECLARACION =			(. cout << "Check in declaracion variable ";
-							wchar_t* name; int type; .)
+							int is_array; wchar_t* name; int type; 
+							is_array = 0;	
+						.)
+						(. int arr_length; .)
      [
-     "lista"
-     "con"
-     EXP
+     "lista"			(. is_array = 1; .)
+     "con"				
+     ent				(. swscanf(t->val, L"%d", &arr_length); .)
      ]
      "var"				
      TIPO<type>
      Ident<name>		(. cout << "Add a new variable ";
-							add_variable(name, type); .)
+							if(is_array == 1) { 
+								is_array = 0;
+								add_variable_array(name, type, arr_length);	
+							} else {	
+								add_variable(name, type);
+							} 
+						.)
      {
      ","
     Ident<name>			(. cout << "Add a new variable 2";
@@ -499,34 +586,112 @@ DECLARACION =			(. cout << "Check in declaracion variable ";
      }
      ";".
 /*******************************************************************/	 
-RETORNO = "regresa" "(" SUPEXPRESION ")" ";".
+RETORNO = 
+	"regresa" 
+	"(" 
+	SUPEXPRESION		(.  /* to check! */
+							int dirValor = pOp.top();
+							pOp.pop();
+							int typeTam = pTipos.top();
+							pTipos.pop();
+							create_quadruple(RET, dirValor, -1, -1);
+						.)	 
+	")" 
+	";".
 /*******************************************************************/
 ASIGLEC = 				(. wchar_t* name; .)
-	Ident<name> 		(. /*Buscar la variable en el scope actual*/
-							
+	Ident<name> 		(.
+							/*Buscamos la variable en el directorio de procedimientos local, si no la encontramos en el local, hay que buscarla en el global*/
+							int dir = 0;
+							Procedure *p = procs_dir.back();
+							if(p->variables.size() > 0){
+								for(int i = 0; i < p->variables.size(); i++ ){
+									Variable * var = p->variables[i];
+									if(coco_string_equal(var->name, name)){
+										/*Meter la direccion encontrada en la pila de operadores*/
+										dir = var->dir;
+										//pOp.push(dir);
+									} 
+								}
+							} else if (p->params.size() > 0) {
+								for(int i = 0; i < p->params.size(); i++ ){
+									Variable * var = p->params[i];
+									if(coco_string_equal(var->name, name)){
+										/*Meter la direccion encontrada en la pila de operadores*/
+										dir = var->dir;
+										//pOp.push(dir);
+									} 
+								}
+							}
+							/*Buscarla en la memoria global*/
+							if(dir == 0) {
+								Procedure * pg = procs_dir[0];
+								if(pg->variables.size() > 0){
+									for(int i = 0; i < pg->variables.size(); i++ ){
+										Variable * var = pg->variables[i];
+										if(coco_string_equal(var->name, name)){
+											/*Meter la direccion encontrada en la pila de operadores*/
+											dir = var->dir;
+											//pOp.push(dir);
+										} else if (i == pg->variables.size() -1){
+											/*NO EXISTE =( */
+											Err(L"La variable a la que le quieres asignar el valor no existe");
+											exit(1);
+										}
+									}
+								} else {
+									/*NO EXISTE =( */
+									Err(L"La variable a la que le quieres asignar el valor no existe");
+									exit(1);
+								}
+							}
 						.)
-	["[" ent "]"] 
-	"=" 
-	(					(. int typeLec; .)
-	LECTURA<typeLec>	(. /*Generar cuadruplo para la lectura*/
-						
-						.) 
-	| ASIGNA
+	[
+	"[" 
+	EXP					
+	"]"] 
+	"=" 				(. int dirTo;.)
+	(LECTURA			(. 
+						/* Cuadruplo para la asgnacion */
+						dirTo = pOp.top();
+						pOp.pop();
+						create_quadruple(ASIG, dirTo, -1, dir);	
+						.)	
+	| ASIGNA			(. 
+						/* Cuadruplo para la asgnacion */
+						dirTo = pOp.top();
+						pOp.pop();
+						create_quadruple(ASIG, dirTo, -1, dir);	
+						.)	
+	| MATH
+						(. 
+						/* Cuadruplo para la asgnacion */
+						dirTo = pOp.top();
+						pOp.pop();
+						create_quadruple(ASIG, dirTo, -1, dir);	
+						.)
 	).
 /*******************************************************************/	
-LECTURA<int &typeLec> = (. int type; .)
-	"lee" 
-	"(" 
-	TIPO<type> 			(. typeLec = type; .)
-	")" 
+LECTURA =
+	"lee" 				(. int typeLec; int tmpDir; .)
+	"(" 				(. int type; .)
+	TIPO<type> 			
+	")" 				(.
+							tmpDir = get_var_dir(type, temporal_s);
+							create_quadruple(LEC, type, -1, tmpDir);
+							pOp.push(tmpDir);
+						.)
 	";".
 /******************************************************************/	
 ASIGNA = (SUPEXPRESION | LLAMADA)";".
 /******************************************************************/
 LLAMADA = 
 	"evalua"			(. wchar_t* name; .) 
-	Ident<name> 		
-	"(" 
+	Ident<name> 			
+	"(" 				(.
+							create_quadruple(ERA, -1, -1, -1);
+							int position = listQuadruple.size()-1;	
+						.)
 	[
 	SUPEXPRESION
 	{
@@ -536,28 +701,32 @@ LLAMADA =
 	]
 	")"					(.
 							/*Buscar en el directorio de procedimientos para ver si la funcion existe*/
+							if( !(pOp.empty())) {
 							for ( int i = 0; i < procs_dir.size(); i++ ) { 
 								Procedure *p = procs_dir[i];
 								if(coco_string_equal(name, p->name)){
 									/*Si encontro el directorio de procedimiento, generar los cuadruplos necesarios*/
-									create_quadruple(ERA, p->id, -1, -1);
-									for ( int i = 0; i < p->params.size(); i++ ) {
+									update_quadruple(position, 2, p->id);
+									for ( int i = p->params.size()-1; i >= 0; i-- ) {
 										if(p->params[i]->type == pTipos.top() ){
 											pTipos.pop();
-											create_quadruple(PARAM, pOp.top(), -1, -1);
-											pOp.top();
+											create_quadruple(PARAM,  pOp.top(), p->params[i]->dir, -1);
+											pOp.pop();
 										} else {
 											Err(L"Al parecer hubo un error con los parametros");
 											exit(1);
 										}
 									}
-									create_quadruple(GOSUB, p->first_quadruple, -1, -1);
+									int dir = get_var_dir(p->type, temporal_s);
+									create_quadruple(GOSUB, p->first_quadruple, dir, -1);
+									pOp.push(dir);
 									break;
 								} else if ( i ==  procs_dir.size() -1) {
 									/*No lo encontro, hay que marcar un error indicando que el procedimiento no esta*/
 									Err(L"El procedimiento que quieres llamar no ha sido declarado ");
 									exit(1);
 								}
+							}
 							}
 						.).
 /******************************************************************/	
@@ -575,6 +744,7 @@ TERM = 				(. cout << "check in term"; .)
 						int result = cubo[el1][el2][el3];
 						int dir = 0;
 						int op2 = pOp.top();
+						//pOp.pop();
 						pOp.pop();
 						int op1 = pOp.top();
 						pOp.pop();
@@ -618,6 +788,7 @@ TERM = 				(. cout << "check in term"; .)
 TIPO<int &type>
     =   		        (. type = undef;.)
     "ent"       		(. type = ent;.)
+    |"fra"      		(. type = fra;.)
     |"dec"      		(. type = dec;.)
     |"log"    		 	(. type = log;.).
 /*****************************************************************/	
@@ -632,18 +803,38 @@ VAR =
 	Ident<name>			(.
 							/*Obtener las variables del procedimiento actual para buscar los identificadores y meter los tipos y las direcciones*/
 							Procedure *p = procs_dir.back();
-							for ( int i = 0; i < p->variables.size(); i++ ) {
-								Variable *v = p->variables[i];
-								if(coco_string_equal(name, v->name)){
-									pOp.push(v->dir);									
-									cout << "Meti en la pila de op el valor " << v->dir;
-									pTipos.push(v->type);
-									break;
-								}else if (i == p->variables.size() -1){
-									Err(L"Parece que la variable no ha sido declarada ");
-									exit(1);
+							int exists = 0;
+							if(p->variables.size() > 0 && exists == 0){
+								for ( int i = 0; i < p->variables.size(); i++ ) {
+									Variable *v = p->variables[i];
+									if(coco_string_equal(name, v->name)){
+										pOp.push(v->dir);	
+										exists = 1;	
+										cout << "Meti en la pila de op el valor " << v->dir;
+										pTipos.push(v->type);
+										break;
+									}
 								}
-							}
+							} 
+							if (p->params.size() > 0 && exists == 0){
+								for ( int i = 0; i < p->params.size(); i++ ) {
+									Variable *v = p->params[i];
+									if(coco_string_equal(name, v->name)){
+										pOp.push(v->dir);	
+										exists = 1;
+										cout << "Meti en la pila de op el valor " << v->dir;
+										pTipos.push(v->type);
+										break;
+									} else if(i == p->params.size() -1) {
+										Err(L"Parece que la variable no ha sido declarada ");
+										exit(1);
+									}
+								}
+							} 
+							if (exists == 0) {
+								Err(L"Parece que la variable no ha sido declarada ");
+								exit(1);
+							}	
 								
 						.)
 	|					(.int value; .)
@@ -659,7 +850,7 @@ VAR =
 										break;
 									} else if (i == entTable.size()-1) {
 										/*No existe, hay que agregarla*/
-										int dir = get_var_dir(constant_s, ent);
+										int dir = get_var_dir(ent, constant_s);
 										IntegerConst *nic = new IntegerConst(dir, value);
 										entTable.push_back(nic);
 										pOp.push(dir);
@@ -667,7 +858,8 @@ VAR =
 									}
 								}
 							} else {
-								int dir = get_var_dir(constant_s, ent);
+								/*No existe, hay que agregarla*/
+								int dir = get_var_dir(ent, constant_s);
 								IntegerConst *nic = new IntegerConst(dir, value);
 								entTable.push_back(nic);
 								pOp.push(dir);
@@ -687,7 +879,7 @@ VAR =
 										break;
 									} else if (i == decTable.size()-1) {
 										/*No existe, hay que agregarla*/
-										int dir = get_var_dir(constant_s, dec);
+										int dir = get_var_dir(dec, constant_s);
 										FloatConst *nfc = new FloatConst(dir, value);
 										decTable.push_back(nfc);
 										pOp.push(dir);
@@ -696,7 +888,7 @@ VAR =
 								}
 							} else {
 								/*No existe, hay que agregarla*/
-								int dir = get_var_dir(constant_s, dec);
+								int dir = get_var_dir(dec, constant_s);
 								FloatConst *nfc = new FloatConst(dir, value);
 								decTable.push_back(nfc);
 								pOp.push(dir);
@@ -717,7 +909,7 @@ VAR =
 										break;
 									} else if (i == boolTable.size()-1) {
 										/*No existe, hay que agregarla*/
-										int dir = get_var_dir(constant_s, log);
+										int dir = get_var_dir(log, constant_s);
 										BoolConst *nbc = new BoolConst(dir, value);
 										boolTable.push_back(nbc);
 										pOp.push(dir);
@@ -726,7 +918,7 @@ VAR =
 								}
 							} else {
 								/*No existe, hay que agregarla*/
-								int dir = get_var_dir(constant_s, log);
+								int dir = get_var_dir(log, constant_s);
 								BoolConst *nbc = new BoolConst(dir, value);
 								boolTable.push_back(nbc);
 								pOp.push(dir);
@@ -745,7 +937,7 @@ VAR =
 										break;
 									} else if (i == fraTable.size()-1) {
 										/*No existe, hay que agregarla*/
-										int dir = get_var_dir(constant_s, fra);
+										int dir = get_var_dir(fra, constant_s);
 										FraConst *nfrc = new FraConst(dir, value);
 										fraTable.push_back(nfrc);
 										pOp.push(dir);
@@ -754,7 +946,7 @@ VAR =
 								}
 							} else {
 								/*No existe, hay que agregarla*/
-								int dir = get_var_dir(constant_s, fra);
+								int dir = get_var_dir(fra, constant_s);
 								FraConst *nfrc = new FraConst(dir, value);
 								fraTable.push_back(nfrc);
 								pOp.push(dir);
@@ -791,6 +983,7 @@ EXPRESION = 			(. cout << "Checkin expression"; .)
 							int result = cubo[el1][el2][el3];
 							int dir = 0;
 							int op2 = pOp.top();
+							//pOp.pop();
 							pOp.pop();
 							int op1 = pOp.top();
 							pOp.pop();
@@ -833,11 +1026,13 @@ EXP = 					(. cout << "Checkin EXP"; .)
 							int result = cubo[el1][el2][el3];
 							int dir = 0;
 							int op2 = pOp.top();
+							//pOp.pop();
 							pOp.pop();
 							int op1 = pOp.top();
 							pOp.pop();
 							if(result != 0){
 								dir = get_var_dir(result, temporal_s);
+								cout << dir;
 								switch (el1){
 									case 0: create_quadruple(ADD, op1, op2, dir);
 										break;
@@ -886,6 +1081,7 @@ SUPEXPRESION =
 							int result = cubo[el1][el2][el3];
 							int dir = 0;
 							int op2 = pOp.top();
+							//pOp.pop();
 							pOp.pop();
 							int op1 = pOp.top();
 							pOp.pop();
@@ -980,7 +1176,7 @@ CICLO =
 						int ret_dir = pSaltos.top();
 						pSaltos.pop();
 						create_quadruple(GOTO, ret_dir, -1, -1);
-						update_quadruple(false_dir -1, 4, program_counter);
+						update_quadruple(false_dir -1, 4, program_counter+1);
 					.)
 	) 
 	| 
@@ -1012,19 +1208,18 @@ CICLO =
 						int ret_dir = pSaltos.top();
 						pSaltos.pop();
 						create_quadruple(GOTO, ret_dir, -1, -1);
-						update_quadruple(false_dir -1, 4, program_counter);
+						update_quadruple(false_dir -1, 4, program_counter+1);
 					.)	
 	).
 /******************************************************************/
 FACTOR = 				(. cout << "checkin factor"; .)
-	("pot" "(" EXP "," EXP ")")
-	| 
-	(["raiz"] 
+	(
 	"("					(. pOper.push(false_f);	.) 
 	EXP
 	")"					(. pOper.pop();
 							cout << "Si quite el parentesis";.)
-	) | VAR				(. cout << "checkout factor"; .).
+	) | VAR				
+						(. cout << "checkout factor"; .).
 /******************************************************************/
 ALTO = "alto" ";".
 /******************************************************************/
@@ -1036,12 +1231,12 @@ CONDICION =
 							if(pTipos.top() != log){
 								Err(L"La expresion de la condicion tiene que ser logica");
 								exit(1);
-							}else {
+							} else {
 								pTipos.pop();
 								tempR = pOp.top();
 								pOp.pop();
 								create_quadruple(GOTOF, tempR, -1, -1);
-								pSaltos.push(program_counter -1);
+								pSaltos.push(program_counter );
 							}
 						.)
 
@@ -1053,8 +1248,8 @@ CONDICION =
 							create_quadruple(GOTO,-1,-1,-1);
 							int quadruplePosition = pSaltos.top();
 							pSaltos.pop();
-							update_quadruple(quadruplePosition -1, 4, program_counter);
-							pSaltos.push(program_counter -1);
+							update_quadruple(quadruplePosition -1, 4, program_counter+1);
+							pSaltos.push(program_counter );
 						.)
 	"si_no" 
 	"{"
@@ -1063,7 +1258,7 @@ CONDICION =
 							/*Paso 3 para los estatutos condicionales*/
 							int qToUpdate = pSaltos.top();
 							pSaltos.pop();
-							update_quadruple(qToUpdate-1, 4, program_counter);
+							update_quadruple(qToUpdate-1, 4, program_counter+1);
 						.)
 	"}"].
 /******************************************************************/
@@ -1072,7 +1267,7 @@ AVANZA = 				(. int tipoMovimiento; .)
 	("arriba" 			(. tipoMovimiento = 0; .) 
 	|"abajo" 			(. tipoMovimiento = 1; .)
 	|"izquierda" 		(. tipoMovimiento = 2; .) 
-	|"derecha"			(. tipoMovimiento = 2; .) 
+	|"derecha"			(. tipoMovimiento = 3; .) 
 	) EXP				(. int tipoAvance = pTipos.top();
 							pTipos.pop();
 						   int dirAvance = pOp.top();
