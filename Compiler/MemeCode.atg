@@ -571,7 +571,7 @@ DECLARACION =			(. cout << "Check in declaracion variable ";
      ]
      "var"				
      TIPO<type>
-     Ident<name>		(. cout << "Add a new variable ";
+     Ident<name>		(. cout << endl << "Add a new variable " << endl;
 							if(is_array == 1) { 
 								is_array = 0;
 								add_variable_array(name, type, arr_length);	
@@ -1012,8 +1012,12 @@ EXPRESION = 			(. cout << "Checkin expression"; .)
 						.)
 	]					(. cout << "Checkout Expression"; .).
 /******************************************************************/
-EXP = 					(. cout << "Checkin EXP"; .)
+EXP = 					(. 
+							static bool first_time = true;
+							cout << "Checkin EXP"; 
+						.)
 	TERM 				(. 
+						
 						if( !(pOper.empty()) && (pOper.top() == plus || 
 						pOper.top() == minus )) {
 							int el3 = pTipos.top();
@@ -1026,8 +1030,12 @@ EXP = 					(. cout << "Checkin EXP"; .)
 							int result = cubo[el1][el2][el3];
 							int dir = 0;
 							int op2 = pOp.top();
-							//pOp.pop();
 							pOp.pop();
+							if (first_time) {
+								// It's a virgin
+								first_time = false;
+								pOp.pop();
+							}
 							int op1 = pOp.top();
 							pOp.pop();
 							if(result != 0){

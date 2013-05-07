@@ -523,6 +523,8 @@ void Parser::MATH() {
 }
 
 void Parser::EXP() {
+		// DEBUG USE
+		static bool first_time = true;
 		cout << "Checkin EXP"; 
 		TERM();
 		if( !(pOper.empty()) && (pOper.top() == plus || 
@@ -539,6 +541,11 @@ void Parser::EXP() {
 		int op2 = pOp.top();
 		//pOp.pop();
 		pOp.pop();
+		if (first_time) {
+			// It's a virgin
+			first_time = false;
+			pOp.pop();
+		}
 		int op1 = pOp.top();
 		pOp.pop();
 		if(result != 0){
