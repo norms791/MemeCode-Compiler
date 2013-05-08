@@ -113,7 +113,7 @@ void Parser::DECLARACION() {
 		Expect(21 /* "var" */);
 		TIPO(type);
 		Ident(name);
-		cout << "Add a new variable ";
+		cout << endl << "Add a new variable " << endl;
 		if(is_array == 1) { 
 		is_array = 0;
 		add_variable_array(name, type, arr_length);	
@@ -523,9 +523,6 @@ void Parser::MATH() {
 }
 
 void Parser::EXP() {
-		// DEBUG USE
-		static bool first_time = true;
-		cout << "Checkin EXP"; 
 		TERM();
 		if( !(pOper.empty()) && (pOper.top() == plus || 
 		pOper.top() == minus )) {
@@ -539,18 +536,11 @@ void Parser::EXP() {
 		int result = cubo[el1][el2][el3];
 		int dir = 0;
 		int op2 = pOp.top();
-		//pOp.pop();
 		pOp.pop();
-		if (first_time) {
-			// It's a virgin
-			first_time = false;
-			pOp.pop();
-		}
 		int op1 = pOp.top();
 		pOp.pop();
 		if(result != 0){
 			dir = get_var_dir(result, temporal_s);
-			cout << dir;
 			switch (el1){
 				case 0: create_quadruple(ADD, op1, op2, dir);
 					break;
@@ -828,7 +818,7 @@ void Parser::VAR() {
 						exists = 1;	
 						cout << "Meti en la pila de op el valor " << v->dir;
 						pTipos.push(v->type);
-						break;
+						return;
 					}
 				}
 				} 
@@ -840,7 +830,7 @@ void Parser::VAR() {
 						exists = 1;
 						cout << "Meti en la pila de op el valor " << v->dir;
 						pTipos.push(v->type);
-						break;
+						return;
 					} else if(i == p->params.size() -1) {
 						Err(L"Parece que la variable no ha sido declarada ");
 						exit(1);
@@ -854,7 +844,8 @@ void Parser::VAR() {
 				
 				
 			} else if (la->kind == _ent) {
-				int value; 
+				int value; int exists;
+				exists = 0; 
 				Get();
 				swscanf(t->val, L"%d", &value);
 				/*Validar que el arreglo no este vacio, si esta vacio agregarlo sin buscar*/
@@ -865,14 +856,16 @@ void Parser::VAR() {
 				if(ic->value == value){
 				pOp.push(ic->dir);
 				pTipos.push(ent);
-				break;
-				} else if (i == entTable.size()-1) {
+				return;
+				} 
+				if (i == entTable.size()-1 && exists == 0) {
 				/*No existe, hay que agregarla*/
 				int dir = get_var_dir(ent, constant_s);
 				IntegerConst *nic = new IntegerConst(dir, value);
 				entTable.push_back(nic);
 				pOp.push(dir);
 				pTipos.push(ent);
+				return;
 				}
 				}
 				} else {
@@ -896,7 +889,7 @@ void Parser::VAR() {
 				if(fc->value == value){
 				pOp.push(fc->dir);
 				pTipos.push(dec);
-				break;
+				return;
 				} else if (i == decTable.size()-1) {
 				/*No existe, hay que agregarla*/
 				int dir = get_var_dir(dec, constant_s);
@@ -904,6 +897,7 @@ void Parser::VAR() {
 				decTable.push_back(nfc);
 				pOp.push(dir);
 				pTipos.push(dec);
+				return;
 				}
 				}
 				} else {
@@ -926,7 +920,7 @@ void Parser::VAR() {
 				if(bc->value == value){
 					pOp.push(bc->dir);
 					pTipos.push(log);
-					break;
+					return;
 				} else if (i == boolTable.size()-1) {
 					/*No existe, hay que agregarla*/
 					int dir = get_var_dir(log, constant_s);
@@ -934,6 +928,7 @@ void Parser::VAR() {
 					boolTable.push_back(nbc);
 					pOp.push(dir);
 					pTipos.push(log);
+					return;
 				}
 			}
 			} else {

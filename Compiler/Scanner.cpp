@@ -1599,5 +1599,4 @@ void Scanner::ResetPeek() {
 	pt = tokens;
 }
 
-
 }

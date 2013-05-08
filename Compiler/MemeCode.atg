@@ -685,7 +685,7 @@ LECTURA =
 /******************************************************************/	
 ASIGNA = (SUPEXPRESION | LLAMADA)";".
 /******************************************************************/
-LLAMADA = 
+LLAMADA = 					
 	"evalua"			(. wchar_t* name; .) 
 	Ident<name> 			
 	"(" 				(.
@@ -812,7 +812,7 @@ VAR =
 										exists = 1;	
 										cout << "Meti en la pila de op el valor " << v->dir;
 										pTipos.push(v->type);
-										break;
+										return;
 									}
 								}
 							} 
@@ -824,7 +824,7 @@ VAR =
 										exists = 1;
 										cout << "Meti en la pila de op el valor " << v->dir;
 										pTipos.push(v->type);
-										break;
+										return;
 									} else if(i == p->params.size() -1) {
 										Err(L"Parece que la variable no ha sido declarada ");
 										exit(1);
@@ -837,7 +837,8 @@ VAR =
 							}	
 								
 						.)
-	|					(.int value; .)
+	|					(.int value; int exists;
+				exists = 0; .)
 	ent					(.swscanf(t->val, L"%d", &value);
 							/*Validar que el arreglo no este vacio, si esta vacio agregarlo sin buscar*/
 							if( !entTable.empty() ) {
@@ -847,14 +848,16 @@ VAR =
 									if(ic->value == value){
 										pOp.push(ic->dir);
 										pTipos.push(ent);
-										break;
-									} else if (i == entTable.size()-1) {
+										return;
+									} 
+									if (i == entTable.size()-1 && exists == 0) {
 										/*No existe, hay que agregarla*/
 										int dir = get_var_dir(ent, constant_s);
 										IntegerConst *nic = new IntegerConst(dir, value);
 										entTable.push_back(nic);
 										pOp.push(dir);
 										pTipos.push(ent);
+										return;
 									}
 								}
 							} else {
@@ -876,7 +879,7 @@ VAR =
 									if(fc->value == value){
 										pOp.push(fc->dir);
 										pTipos.push(dec);
-										break;
+										return;
 									} else if (i == decTable.size()-1) {
 										/*No existe, hay que agregarla*/
 										int dir = get_var_dir(dec, constant_s);
@@ -884,6 +887,7 @@ VAR =
 										decTable.push_back(nfc);
 										pOp.push(dir);
 										pTipos.push(dec);
+										return;
 									}
 								}
 							} else {
@@ -906,7 +910,7 @@ VAR =
 									if(bc->value == value){
 										pOp.push(bc->dir);
 										pTipos.push(log);
-										break;
+										return;
 									} else if (i == boolTable.size()-1) {
 										/*No existe, hay que agregarla*/
 										int dir = get_var_dir(log, constant_s);
@@ -914,6 +918,7 @@ VAR =
 										boolTable.push_back(nbc);
 										pOp.push(dir);
 										pTipos.push(log);
+										return;
 									}
 								}
 							} else {
@@ -1012,10 +1017,7 @@ EXPRESION = 			(. cout << "Checkin expression"; .)
 						.)
 	]					(. cout << "Checkout Expression"; .).
 /******************************************************************/
-EXP = 					(. 
-							static bool first_time = true;
-							cout << "Checkin EXP"; 
-						.)
+EXP = 					
 	TERM 				(. 
 						
 						if( !(pOper.empty()) && (pOper.top() == plus || 
@@ -1031,16 +1033,10 @@ EXP = 					(.
 							int dir = 0;
 							int op2 = pOp.top();
 							pOp.pop();
-							if (first_time) {
-								// It's a virgin
-								first_time = false;
-								pOp.pop();
-							}
 							int op1 = pOp.top();
 							pOp.pop();
 							if(result != 0){
 								dir = get_var_dir(result, temporal_s);
-								cout << dir;
 								switch (el1){
 									case 0: create_quadruple(ADD, op1, op2, dir);
 										break;
