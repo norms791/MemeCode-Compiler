@@ -78,7 +78,7 @@ void Parser::MemeCode() {
 		p->first_quadruple = program_counter;
 		
 		
-		while (la->kind == 19 /* "lista" */ || la->kind == 21 /* "var" */) {
+		while (la->kind == 19 /* "var" */) {
 			DECLARACION();
 		}
 		while (la->kind == 18 /* "func" */) {
@@ -99,21 +99,19 @@ void Parser::Ident(wchar_t* &name) {
 
 void Parser::DECLARACION() {
 		cout << "Check in declaracion variable ";
-		int is_array; wchar_t* name; int type; 
+		int is_array; wchar_t* name; int type; int arr_length;
 		is_array = 0;	
 		
-		int arr_length; 
-		if (la->kind == 19 /* "lista" */) {
-			Get();
-			is_array = 1; 
-			Expect(20 /* "con" */);
-			Expect(_ent);
-			swscanf(t->val, L"%d", &arr_length); 
-		}
-		Expect(21 /* "var" */);
+		Expect(19 /* "var" */);
 		TIPO(type);
 		Ident(name);
-		cout << endl << "Add a new variable " << endl;
+		if (la->kind == 20 /* "[" */) {
+			Get();
+			is_array = 1; 
+			Expect(_ent);
+			swscanf(t->val, L"%d", &arr_length); 
+			Expect(21 /* "]" */);
+		}
 		if(is_array == 1) { 
 		is_array = 0;
 		add_variable_array(name, type, arr_length);	
@@ -124,8 +122,21 @@ void Parser::DECLARACION() {
 		while (la->kind == 15 /* "," */) {
 			Get();
 			Ident(name);
-			cout << "Add a new variable 2";
-			add_variable(name, type); 
+			is_array = 0; 
+			if (la->kind == 20 /* "[" */) {
+				Get();
+				is_array = 1; 
+				Expect(_ent);
+				swscanf(t->val, L"%d", &arr_length); 
+				Expect(21 /* "]" */);
+			}
+			if(is_array == 1) { 
+			is_array = 0;
+			add_variable_array(name, type, arr_length);	
+			} else {	
+			add_variable(name, type);
+			}  
+			
 		}
 		Expect(16 /* ";" */);
 }
@@ -150,7 +161,7 @@ void Parser::METODO() {
 		p->first_quadruple = program_counter +1;
 		
 		Expect(7 /* "{" */);
-		while (la->kind == 19 /* "lista" */ || la->kind == 21 /* "var" */) {
+		while (la->kind == 19 /* "var" */) {
 			DECLARACION();
 		}
 		while (StartOf(2)) {
@@ -185,7 +196,7 @@ void Parser::PRINCIPAL() {
 		p->first_quadruple = program_counter + 1;
 		update_quadruple(1, 2, p->first_quadruple);
 		
-		while (la->kind == 19 /* "lista" */ || la->kind == 21 /* "var" */) {
+		while (la->kind == 19 /* "var" */) {
 			DECLARACION();
 		}
 		while (StartOf(2)) {
@@ -203,15 +214,15 @@ void Parser::PRINCIPAL() {
 
 void Parser::ESTATUTO() {
 		switch (la->kind) {
-		case 57 /* "repetir" */: case 59 /* "mientras" */: {
+		case 55 /* "repetir" */: case 57 /* "mientras" */: {
 			CICLO();
 			break;
 		}
-		case 61 /* "si" */: {
+		case 59 /* "si" */: {
 			CONDICION();
 			break;
 		}
-		case 71 /* "meme" */: {
+		case 69 /* "meme" */: {
 			MOVIMIENTO();
 			break;
 		}
@@ -227,21 +238,21 @@ void Parser::ESTATUTO() {
 			RETORNO();
 			break;
 		}
-		case 51 /* "pluma" */: {
+		case 49 /* "pluma" */: {
 			PLUMA();
 			break;
 		}
-		default: SynErr(73); break;
+		default: SynErr(71); break;
 		}
 }
 
 void Parser::CICLO() {
-		if (la->kind == 57 /* "repetir" */) {
+		if (la->kind == 55 /* "repetir" */) {
 			Get();
 			pSaltos.push(program_counter);
 			
 			EXP();
-			Expect(58 /* "veces" */);
+			Expect(56 /* "veces" */);
 			int resultType = pTipos.top();
 			pTipos.pop();
 			int result;
@@ -267,7 +278,7 @@ void Parser::CICLO() {
 			create_quadruple(GOTO, ret_dir, -1, -1);
 			update_quadruple(false_dir -1, 4, program_counter+1);
 			
-		} else if (la->kind == 59 /* "mientras" */) {
+		} else if (la->kind == 57 /* "mientras" */) {
 			Get();
 			pSaltos.push(program_counter);
 			
@@ -297,11 +308,11 @@ void Parser::CICLO() {
 			create_quadruple(GOTO, ret_dir, -1, -1);
 			update_quadruple(false_dir -1, 4, program_counter+1);
 			
-		} else SynErr(74);
+		} else SynErr(72);
 }
 
 void Parser::CONDICION() {
-		Expect(61 /* "si" */);
+		Expect(59 /* "si" */);
 		Expect(12 /* "(" */);
 		SUPEXPRESION();
 		Expect(13 /* ")" */);
@@ -322,7 +333,7 @@ void Parser::CONDICION() {
 			ESTATUTO();
 		}
 		Expect(8 /* "}" */);
-		if (la->kind == 62 /* "si_no" */) {
+		if (la->kind == 60 /* "si_no" */) {
 			create_quadruple(GOTO,-1,-1,-1);
 			int quadruplePosition = pSaltos.top();
 			pSaltos.pop();
@@ -343,31 +354,32 @@ void Parser::CONDICION() {
 }
 
 void Parser::MOVIMIENTO() {
-		Expect(71 /* "meme" */);
+		Expect(69 /* "meme" */);
 		Expect(10 /* ":" */);
-		if (la->kind == 67 /* "gira" */) {
+		if (la->kind == 65 /* "gira" */) {
 			GIRA();
-		} else if (la->kind == 63 /* "avanza" */) {
+		} else if (la->kind == 61 /* "avanza" */) {
 			AVANZA();
-		} else if (la->kind == 69 /* "espera" */) {
+		} else if (la->kind == 67 /* "espera" */) {
 			ESPERA();
-		} else if (la->kind == 60 /* "alto" */) {
+		} else if (la->kind == 58 /* "alto" */) {
 			ALTO();
-		} else SynErr(75);
+		} else SynErr(73);
 }
 
 void Parser::ASIGLEC() {
-		wchar_t* name; 
+		wchar_t* name; int is_array; int arr_length;
 		Ident(name);
-		int dir = 0;
+		int dir_var = 0;
 		Procedure *p = procs_dir.back();
 		if(p->variables.size() > 0){
 		for(int i = 0; i < p->variables.size(); i++ ){
 			Variable * var = p->variables[i];
 			if(coco_string_equal(var->name, name)){
 				/*Meter la direccion encontrada en la pila de operadores*/
-				dir = var->dir;
-				//pOp.push(dir);
+				dir_var = var->dir;
+				is_array = var->is_array;
+				arr_length = var->arr_length;
 			} 
 		}
 		} else if (p->params.size() > 0) {
@@ -375,21 +387,23 @@ void Parser::ASIGLEC() {
 			Variable * var = p->params[i];
 			if(coco_string_equal(var->name, name)){
 				/*Meter la direccion encontrada en la pila de operadores*/
-				dir = var->dir;
-				//pOp.push(dir);
+				dir_var = var->dir;
+				is_array = var->is_array;
+				arr_length = var->arr_length;
 			} 
 		}
 		}
 		/*Buscarla en la memoria global*/
-		if(dir == 0) {
+		if(dir_var == 0) {
 		Procedure * pg = procs_dir[0];
 		if(pg->variables.size() > 0){
 			for(int i = 0; i < pg->variables.size(); i++ ){
 				Variable * var = pg->variables[i];
 				if(coco_string_equal(var->name, name)){
 					/*Meter la direccion encontrada en la pila de operadores*/
-					dir = var->dir;
-					//pOp.push(dir);
+					dir_var = var->dir;
+					is_array = var->is_array;
+					arr_length = var->arr_length;
 				} else if (i == pg->variables.size() -1){
 					/*NO EXISTE =( */
 					Err(L"La variable a la que le quieres asignar el valor no existe");
@@ -403,32 +417,71 @@ void Parser::ASIGLEC() {
 		}
 		}
 		
-		if (la->kind == 23 /* "[" */) {
+		if (la->kind == 20 /* "[" */) {
 			Get();
 			EXP();
-			Expect(24 /* "]" */);
+			if(is_array == 0) {
+			Err(L"La variable a la que quieres asignar contenido no es un arreglo");
+			exit(1);
+			}
+			
+			Expect(21 /* "]" */);
 		}
-		Expect(25 /* "=" */);
-		int dirTo;
-		if (la->kind == 26 /* "lee" */) {
+		Expect(23 /* "=" */);
+		int dir_exp;
+		if (la->kind == 24 /* "lee" */) {
 			LECTURA();
-			dirTo = pOp.top();
+			int dir_lectura;
+			dir_lectura = pOp.top();
 			pOp.pop();
-			create_quadruple(ASIG, dirTo, -1, dir);	
+			if (is_array == 0) {
+			/* Cuadruplo para la asgnacion */
+			create_quadruple(ASIG, dir_lectura, -1, dir_var);	
+			} else {
+			/*Generar los cuaduplos para los arreglos*/
+			dir_exp = pOp.top();
+			pOp.pop();
+			int dir_dir = (5, temporal_s);
+			create_quadruple(VERIF, dir_exp, arr_length, -1);
+			create_quadruple(ADD, dir_var, dir_exp, dir_dir);
+			create_quadruple(ASIG, dir_lectura, -1,  dir_dir);
+			}
 			
 		} else if (StartOf(3)) {
 			ASIGNA();
-			dirTo = pOp.top();
+			int dir_asig;
+			dir_asig = pOp.top();
 			pOp.pop();
-			create_quadruple(ASIG, dirTo, -1, dir);	
+			if (is_array == 0) {
+			create_quadruple(ASIG, dir_asig, -1, dir_var);	
+			} else {
+			/*Generar los cuaduplos para los arreglos*/
+			dir_exp = pOp.top();
+			pOp.pop();
+			int dir_dir = (5, temporal_s);
+			create_quadruple(VERIF, dir_exp, arr_length, -1);
+			create_quadruple(ADD, dir_var, dir_exp, dir_dir);
+			create_quadruple(ASIG, dir_asig, -1,  dir_dir);
+			}
 			
 		} else if (la->kind == 9 /* "obtiene" */ || la->kind == 14 /* "potencia" */) {
 			MATH();
-			dirTo = pOp.top();
+			int dir_math;
+			dir_math = pOp.top();
 			pOp.pop();
-			create_quadruple(ASIG, dirTo, -1, dir);	
+			if (is_array == 0 ){
+			create_quadruple(ASIG, dir_math, -1, dir_var);	
+			} else {
+			/*Generar los cuaduplos para los arreglos*/
+			dir_exp = pOp.top();
+			pOp.pop();
+			int dir_dir = (5, temporal_s);
+			create_quadruple(VERIF, dir_exp, arr_length, -1);
+			create_quadruple(ADD, dir_var, dir_exp, dir_dir);
+			create_quadruple(ASIG, dir_math, -1,  dir_dir);
+			}	
 			
-		} else SynErr(76);
+		} else SynErr(74);
 }
 
 void Parser::IMPRIME() {
@@ -460,17 +513,17 @@ void Parser::RETORNO() {
 }
 
 void Parser::PLUMA() {
-		Expect(51 /* "pluma" */);
+		Expect(49 /* "pluma" */);
 		Expect(10 /* ":" */);
-		if (la->kind == 52 /* "color" */) {
+		if (la->kind == 50 /* "color" */) {
 			Get();
-			Expect(25 /* "=" */);
+			Expect(23 /* "=" */);
 			int numColor; 
 			COLOR(numColor);
 			create_quadruple(pCOLOR, numColor, -1, -1); 
-		} else if (la->kind == 53 /* "tamaño" */) {
+		} else if (la->kind == 51 /* "tamaño" */) {
 			Get();
-			Expect(25 /* "=" */);
+			Expect(23 /* "=" */);
 			EXP();
 			int DirTam = pOp.top();
 			pOp.pop();
@@ -483,16 +536,16 @@ void Parser::PLUMA() {
 			exit(1);	
 			}
 			
-		} else if (la->kind == 54 /* "borra" */) {
+		} else if (la->kind == 52 /* "borra" */) {
 			Get();
 			create_quadruple(pBORRA, -1, -1, -1); 
-		} else if (la->kind == 55 /* "arriba" */) {
+		} else if (la->kind == 53 /* "arriba" */) {
 			Get();
 			create_quadruple(pARRIBA, -1, -1, -1); 
-		} else if (la->kind == 56 /* "abajo" */) {
+		} else if (la->kind == 54 /* "abajo" */) {
 			Get();
 			create_quadruple(pABAJO, -1, -1, -1); 
-		} else SynErr(77);
+		} else SynErr(75);
 		Expect(16 /* ";" */);
 }
 
@@ -506,9 +559,15 @@ void Parser::MATH() {
 			Expect(_ent);
 			swscanf(t->val, L"%d", &value1); 
 			Expect(13 /* ")" */);
-			create_quadruple(RAIZ, value1, -1, -1);
+			int dir_raiz = get_var_dir(dec, temporal_s);
+			create_quadruple(RAIZ, value1, -1, dir_raiz);
+			/*Meter la direccion a la pila de operadores y el tipo a la pila de tipos*/
+			pOp.push(dir_raiz);
+			pTipos.push(dec);
+			
 		} else if (la->kind == 14 /* "potencia" */) {
 			Get();
+			int dir_pot = get_var_dir(dec, temporal_s); 
 			Expect(12 /* "(" */);
 			int value1; int value2; 
 			Expect(_ent);
@@ -517,9 +576,12 @@ void Parser::MATH() {
 			Expect(_ent);
 			swscanf(t->val, L"%d", &value2); 
 			Expect(13 /* ")" */);
-			create_quadruple(POTENCIA, value1, value2, -1);
+			create_quadruple(POTENCIA, value1, value2, dir_pot);
+			pOp.push(dir_pot);
+			pTipos.push(dec);
+			
 			Expect(16 /* ";" */);
-		} else SynErr(78);
+		} else SynErr(76);
 }
 
 void Parser::EXP() {
@@ -564,8 +626,8 @@ void Parser::EXP() {
 		}
 		} 
 		
-		if (la->kind == 34 /* "+" */ || la->kind == 35 /* "-" */) {
-			if (la->kind == 34 /* "+" */) {
+		if (la->kind == 32 /* "+" */ || la->kind == 33 /* "-" */) {
+			if (la->kind == 32 /* "+" */) {
 				Get();
 				pOper.push(plus); 
 			} else {
@@ -578,20 +640,20 @@ void Parser::EXP() {
 }
 
 void Parser::TIPO(int &type) {
-		if (la->kind == 30 /* "ent" */) {
+		if (la->kind == 28 /* "ent" */) {
 			type = undef;
 			Get();
 			type = ent;
-		} else if (la->kind == 31 /* "fra" */) {
+		} else if (la->kind == 29 /* "fra" */) {
 			Get();
 			type = fra;
-		} else if (la->kind == 32 /* "dec" */) {
+		} else if (la->kind == 30 /* "dec" */) {
 			Get();
 			type = dec;
-		} else if (la->kind == 33 /* "log" */) {
+		} else if (la->kind == 31 /* "log" */) {
 			Get();
 			type = log;
-		} else SynErr(79);
+		} else SynErr(77);
 }
 
 void Parser::DECLARACIONMETODO() {
@@ -606,8 +668,8 @@ void Parser::DECLARACIONMETODO() {
 
 void Parser::SUPEXPRESION() {
 		EXPRESION();
-		if (la->kind == 40 /* "&" */ || la->kind == 41 /* "|" */) {
-			if (la->kind == 40 /* "&" */) {
+		if (la->kind == 38 /* "&" */ || la->kind == 39 /* "|" */) {
+			if (la->kind == 38 /* "&" */) {
 				Get();
 				pOper.push(andpersand); 
 			} else {
@@ -655,7 +717,7 @@ void Parser::SUPEXPRESION() {
 }
 
 void Parser::LECTURA() {
-		Expect(26 /* "lee" */);
+		Expect(24 /* "lee" */);
 		int typeLec; int tmpDir; 
 		Expect(12 /* "(" */);
 		int type; 
@@ -671,14 +733,14 @@ void Parser::LECTURA() {
 void Parser::ASIGNA() {
 		if (StartOf(4)) {
 			SUPEXPRESION();
-		} else if (la->kind == 27 /* "evalua" */) {
+		} else if (la->kind == 25 /* "evalua" */) {
 			LLAMADA();
-		} else SynErr(80);
+		} else SynErr(78);
 		Expect(16 /* ";" */);
 }
 
 void Parser::LLAMADA() {
-		Expect(27 /* "evalua" */);
+		Expect(25 /* "evalua" */);
 		wchar_t* name; 
 		Ident(name);
 		Expect(12 /* "(" */);
@@ -767,8 +829,8 @@ void Parser::TERM() {
 		}
 		}
 		
-		if (la->kind == 28 /* "*" */ || la->kind == 29 /* "/" */) {
-			if (la->kind == 28 /* "*" */) {
+		if (la->kind == 26 /* "*" */ || la->kind == 27 /* "/" */) {
+			if (la->kind == 26 /* "*" */) {
 				Get();
 				pOper.push(times); 
 				TERM();
@@ -793,13 +855,13 @@ void Parser::FACTOR() {
 		} else if (StartOf(5)) {
 			VAR();
 			cout << "checkout factor"; 
-		} else SynErr(81);
+		} else SynErr(79);
 }
 
 void Parser::VAR() {
 		if (StartOf(6)) {
-			if (la->kind == 34 /* "+" */ || la->kind == 35 /* "-" */) {
-				if (la->kind == 34 /* "+" */) {
+			if (la->kind == 32 /* "+" */ || la->kind == 33 /* "-" */) {
+				if (la->kind == 32 /* "+" */) {
 					Get();
 				} else {
 					Get();
@@ -909,7 +971,7 @@ void Parser::VAR() {
 				pTipos.push(dec);
 				}	
 				
-			} else SynErr(82);
+			} else SynErr(80);
 		} else if (la->kind == _log) {
 			bool value; 
 			Log(value);
@@ -969,7 +1031,7 @@ void Parser::VAR() {
 			pTipos.push(fra);
 			}	
 			
-		} else SynErr(83);
+		} else SynErr(81);
 }
 
 void Parser::Log(bool &value) {
@@ -990,13 +1052,13 @@ void Parser::EXPRESION() {
 		cout << "Checkin expression"; 
 		EXP();
 		if (StartOf(7)) {
-			if (la->kind == 36 /* "<" */) {
+			if (la->kind == 34 /* "<" */) {
 				Get();
 				pOper.push(less); 
-			} else if (la->kind == 37 /* ">" */) {
+			} else if (la->kind == 35 /* ">" */) {
 				Get();
 				pOper.push(gtr); 
-			} else if (la->kind == 38 /* "<>" */) {
+			} else if (la->kind == 36 /* "<>" */) {
 				Get();
 				pOper.push(diff); 
 			} else {
@@ -1049,76 +1111,76 @@ void Parser::EXPRESION() {
 
 void Parser::COLOR(int &numColor) {
 		switch (la->kind) {
-		case 42 /* "negro" */: {
+		case 40 /* "negro" */: {
 			Get();
 			numColor = NEGRO; 
 			break;
 		}
-		case 43 /* "azul" */: {
+		case 41 /* "azul" */: {
 			Get();
 			numColor = AZUL; 
 			break;
 		}
-		case 44 /* "rojo" */: {
+		case 42 /* "rojo" */: {
 			Get();
 			numColor = ROJO; 
 			break;
 		}
-		case 45 /* "amarillo" */: {
+		case 43 /* "amarillo" */: {
 			Get();
 			numColor = AMARILLO; 
 			break;
 		}
-		case 46 /* "verde" */: {
+		case 44 /* "verde" */: {
 			Get();
 			numColor = VERDE; 
 			break;
 		}
-		case 47 /* "rosa" */: {
+		case 45 /* "rosa" */: {
 			Get();
 			numColor = ROSA; 
 			break;
 		}
-		case 48 /* "celeste" */: {
+		case 46 /* "celeste" */: {
 			Get();
 			numColor = CELESTE; 
 			break;
 		}
-		case 49 /* "morado" */: {
+		case 47 /* "morado" */: {
 			Get();
 			numColor = MORADO; 
 			break;
 		}
-		case 50 /* "naranja" */: {
+		case 48 /* "naranja" */: {
 			Get();
 			numColor = NARANJA; 
 			break;
 		}
-		default: SynErr(84); break;
+		default: SynErr(82); break;
 		}
 }
 
 void Parser::ALTO() {
-		Expect(60 /* "alto" */);
+		Expect(58 /* "alto" */);
 		Expect(16 /* ";" */);
 }
 
 void Parser::AVANZA() {
 		int tipoMovimiento; 
-		Expect(63 /* "avanza" */);
-		if (la->kind == 55 /* "arriba" */) {
+		Expect(61 /* "avanza" */);
+		if (la->kind == 53 /* "arriba" */) {
 			Get();
 			tipoMovimiento = 0; 
-		} else if (la->kind == 56 /* "abajo" */) {
+		} else if (la->kind == 54 /* "abajo" */) {
 			Get();
 			tipoMovimiento = 1; 
-		} else if (la->kind == 64 /* "izquierda" */) {
+		} else if (la->kind == 62 /* "izquierda" */) {
 			Get();
 			tipoMovimiento = 2; 
-		} else if (la->kind == 65 /* "derecha" */) {
+		} else if (la->kind == 63 /* "derecha" */) {
 			Get();
 			tipoMovimiento = 3; 
-		} else SynErr(85);
+		} else SynErr(83);
 		EXP();
 		int tipoAvance = pTipos.top();
 		pTipos.pop();
@@ -1140,12 +1202,12 @@ void Parser::AVANZA() {
 		exit(1);
 		}	
 		
-		Expect(66 /* "pasos" */);
+		Expect(64 /* "pasos" */);
 		Expect(16 /* ";" */);
 }
 
 void Parser::GIRA() {
-		Expect(67 /* "gira" */);
+		Expect(65 /* "gira" */);
 		int tipoGira = pTipos.top(); 
 		pTipos.pop();
 		int dirGira = pOp.top();
@@ -1159,12 +1221,12 @@ void Parser::GIRA() {
 		exit(1);
 		}
 		
-		Expect(68 /* "grados" */);
+		Expect(66 /* "grados" */);
 		Expect(16 /* ";" */);
 }
 
 void Parser::ESPERA() {
-		Expect(69 /* "espera" */);
+		Expect(67 /* "espera" */);
 		EXP();
 		int tipoEspera = pTipos.top();
 		pTipos.pop();
@@ -1177,7 +1239,7 @@ void Parser::ESPERA() {
 		exit(1);
 		}
 		
-		Expect(70 /* "segundos" */);
+		Expect(68 /* "segundos" */);
 		Expect(16 /* ";" */);
 }
 
@@ -1282,7 +1344,7 @@ void Parser::Parse() {
 }
 
 Parser::Parser(Scanner *scanner) {
-	maxT = 72;
+	maxT = 70;
 
 	ParserInitCaller<Parser>::CallInit(this);
 	dummyToken = NULL;
@@ -1297,15 +1359,15 @@ bool Parser::StartOf(int s) {
 	const bool T = true;
 	const bool x = false;
 
-	static bool set[8][74] = {
-		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,T,x,T, x,T,x,x, x,x,x,x, x,x,x,T, x,x},
-		{x,T,T,T, T,T,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,T,T, T,T,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
+	static bool set[8][72] = {
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,T, x,T,x,T, x,x,x,x, x,x,x,x, x,T,x,x},
+		{x,T,T,T, T,T,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,T,T,T, T,T,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,T,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x}
 	};
 
 
@@ -1345,73 +1407,71 @@ void Errors::SynErr(int line, int col, int n) {
 			case 16: s = coco_string_create(L"\";\" expected"); break;
 			case 17: s = coco_string_create(L"\"imprime\" expected"); break;
 			case 18: s = coco_string_create(L"\"func\" expected"); break;
-			case 19: s = coco_string_create(L"\"lista\" expected"); break;
-			case 20: s = coco_string_create(L"\"con\" expected"); break;
-			case 21: s = coco_string_create(L"\"var\" expected"); break;
+			case 19: s = coco_string_create(L"\"var\" expected"); break;
+			case 20: s = coco_string_create(L"\"[\" expected"); break;
+			case 21: s = coco_string_create(L"\"]\" expected"); break;
 			case 22: s = coco_string_create(L"\"regresa\" expected"); break;
-			case 23: s = coco_string_create(L"\"[\" expected"); break;
-			case 24: s = coco_string_create(L"\"]\" expected"); break;
-			case 25: s = coco_string_create(L"\"=\" expected"); break;
-			case 26: s = coco_string_create(L"\"lee\" expected"); break;
-			case 27: s = coco_string_create(L"\"evalua\" expected"); break;
-			case 28: s = coco_string_create(L"\"*\" expected"); break;
-			case 29: s = coco_string_create(L"\"/\" expected"); break;
-			case 30: s = coco_string_create(L"\"ent\" expected"); break;
-			case 31: s = coco_string_create(L"\"fra\" expected"); break;
-			case 32: s = coco_string_create(L"\"dec\" expected"); break;
-			case 33: s = coco_string_create(L"\"log\" expected"); break;
-			case 34: s = coco_string_create(L"\"+\" expected"); break;
-			case 35: s = coco_string_create(L"\"-\" expected"); break;
-			case 36: s = coco_string_create(L"\"<\" expected"); break;
-			case 37: s = coco_string_create(L"\">\" expected"); break;
-			case 38: s = coco_string_create(L"\"<>\" expected"); break;
-			case 39: s = coco_string_create(L"\"==\" expected"); break;
-			case 40: s = coco_string_create(L"\"&\" expected"); break;
-			case 41: s = coco_string_create(L"\"|\" expected"); break;
-			case 42: s = coco_string_create(L"\"negro\" expected"); break;
-			case 43: s = coco_string_create(L"\"azul\" expected"); break;
-			case 44: s = coco_string_create(L"\"rojo\" expected"); break;
-			case 45: s = coco_string_create(L"\"amarillo\" expected"); break;
-			case 46: s = coco_string_create(L"\"verde\" expected"); break;
-			case 47: s = coco_string_create(L"\"rosa\" expected"); break;
-			case 48: s = coco_string_create(L"\"celeste\" expected"); break;
-			case 49: s = coco_string_create(L"\"morado\" expected"); break;
-			case 50: s = coco_string_create(L"\"naranja\" expected"); break;
-			case 51: s = coco_string_create(L"\"pluma\" expected"); break;
-			case 52: s = coco_string_create(L"\"color\" expected"); break;
-			case 53: s = coco_string_create(L"\"tama\0x00f1o\" expected"); break;
-			case 54: s = coco_string_create(L"\"borra\" expected"); break;
-			case 55: s = coco_string_create(L"\"arriba\" expected"); break;
-			case 56: s = coco_string_create(L"\"abajo\" expected"); break;
-			case 57: s = coco_string_create(L"\"repetir\" expected"); break;
-			case 58: s = coco_string_create(L"\"veces\" expected"); break;
-			case 59: s = coco_string_create(L"\"mientras\" expected"); break;
-			case 60: s = coco_string_create(L"\"alto\" expected"); break;
-			case 61: s = coco_string_create(L"\"si\" expected"); break;
-			case 62: s = coco_string_create(L"\"si_no\" expected"); break;
-			case 63: s = coco_string_create(L"\"avanza\" expected"); break;
-			case 64: s = coco_string_create(L"\"izquierda\" expected"); break;
-			case 65: s = coco_string_create(L"\"derecha\" expected"); break;
-			case 66: s = coco_string_create(L"\"pasos\" expected"); break;
-			case 67: s = coco_string_create(L"\"gira\" expected"); break;
-			case 68: s = coco_string_create(L"\"grados\" expected"); break;
-			case 69: s = coco_string_create(L"\"espera\" expected"); break;
-			case 70: s = coco_string_create(L"\"segundos\" expected"); break;
-			case 71: s = coco_string_create(L"\"meme\" expected"); break;
-			case 72: s = coco_string_create(L"??? expected"); break;
-			case 73: s = coco_string_create(L"invalid ESTATUTO"); break;
-			case 74: s = coco_string_create(L"invalid CICLO"); break;
-			case 75: s = coco_string_create(L"invalid MOVIMIENTO"); break;
-			case 76: s = coco_string_create(L"invalid ASIGLEC"); break;
-			case 77: s = coco_string_create(L"invalid PLUMA"); break;
-			case 78: s = coco_string_create(L"invalid MATH"); break;
-			case 79: s = coco_string_create(L"invalid TIPO"); break;
-			case 80: s = coco_string_create(L"invalid ASIGNA"); break;
-			case 81: s = coco_string_create(L"invalid FACTOR"); break;
-			case 82: s = coco_string_create(L"invalid VAR"); break;
-			case 83: s = coco_string_create(L"invalid VAR"); break;
-			case 84: s = coco_string_create(L"invalid COLOR"); break;
-			case 85: s = coco_string_create(L"invalid AVANZA"); break;
+			case 23: s = coco_string_create(L"\"=\" expected"); break;
+			case 24: s = coco_string_create(L"\"lee\" expected"); break;
+			case 25: s = coco_string_create(L"\"evalua\" expected"); break;
+			case 26: s = coco_string_create(L"\"*\" expected"); break;
+			case 27: s = coco_string_create(L"\"/\" expected"); break;
+			case 28: s = coco_string_create(L"\"ent\" expected"); break;
+			case 29: s = coco_string_create(L"\"fra\" expected"); break;
+			case 30: s = coco_string_create(L"\"dec\" expected"); break;
+			case 31: s = coco_string_create(L"\"log\" expected"); break;
+			case 32: s = coco_string_create(L"\"+\" expected"); break;
+			case 33: s = coco_string_create(L"\"-\" expected"); break;
+			case 34: s = coco_string_create(L"\"<\" expected"); break;
+			case 35: s = coco_string_create(L"\">\" expected"); break;
+			case 36: s = coco_string_create(L"\"<>\" expected"); break;
+			case 37: s = coco_string_create(L"\"==\" expected"); break;
+			case 38: s = coco_string_create(L"\"&\" expected"); break;
+			case 39: s = coco_string_create(L"\"|\" expected"); break;
+			case 40: s = coco_string_create(L"\"negro\" expected"); break;
+			case 41: s = coco_string_create(L"\"azul\" expected"); break;
+			case 42: s = coco_string_create(L"\"rojo\" expected"); break;
+			case 43: s = coco_string_create(L"\"amarillo\" expected"); break;
+			case 44: s = coco_string_create(L"\"verde\" expected"); break;
+			case 45: s = coco_string_create(L"\"rosa\" expected"); break;
+			case 46: s = coco_string_create(L"\"celeste\" expected"); break;
+			case 47: s = coco_string_create(L"\"morado\" expected"); break;
+			case 48: s = coco_string_create(L"\"naranja\" expected"); break;
+			case 49: s = coco_string_create(L"\"pluma\" expected"); break;
+			case 50: s = coco_string_create(L"\"color\" expected"); break;
+			case 51: s = coco_string_create(L"\"tama\0x00f1o\" expected"); break;
+			case 52: s = coco_string_create(L"\"borra\" expected"); break;
+			case 53: s = coco_string_create(L"\"arriba\" expected"); break;
+			case 54: s = coco_string_create(L"\"abajo\" expected"); break;
+			case 55: s = coco_string_create(L"\"repetir\" expected"); break;
+			case 56: s = coco_string_create(L"\"veces\" expected"); break;
+			case 57: s = coco_string_create(L"\"mientras\" expected"); break;
+			case 58: s = coco_string_create(L"\"alto\" expected"); break;
+			case 59: s = coco_string_create(L"\"si\" expected"); break;
+			case 60: s = coco_string_create(L"\"si_no\" expected"); break;
+			case 61: s = coco_string_create(L"\"avanza\" expected"); break;
+			case 62: s = coco_string_create(L"\"izquierda\" expected"); break;
+			case 63: s = coco_string_create(L"\"derecha\" expected"); break;
+			case 64: s = coco_string_create(L"\"pasos\" expected"); break;
+			case 65: s = coco_string_create(L"\"gira\" expected"); break;
+			case 66: s = coco_string_create(L"\"grados\" expected"); break;
+			case 67: s = coco_string_create(L"\"espera\" expected"); break;
+			case 68: s = coco_string_create(L"\"segundos\" expected"); break;
+			case 69: s = coco_string_create(L"\"meme\" expected"); break;
+			case 70: s = coco_string_create(L"??? expected"); break;
+			case 71: s = coco_string_create(L"invalid ESTATUTO"); break;
+			case 72: s = coco_string_create(L"invalid CICLO"); break;
+			case 73: s = coco_string_create(L"invalid MOVIMIENTO"); break;
+			case 74: s = coco_string_create(L"invalid ASIGLEC"); break;
+			case 75: s = coco_string_create(L"invalid PLUMA"); break;
+			case 76: s = coco_string_create(L"invalid MATH"); break;
+			case 77: s = coco_string_create(L"invalid TIPO"); break;
+			case 78: s = coco_string_create(L"invalid ASIGNA"); break;
+			case 79: s = coco_string_create(L"invalid FACTOR"); break;
+			case 80: s = coco_string_create(L"invalid VAR"); break;
+			case 81: s = coco_string_create(L"invalid VAR"); break;
+			case 82: s = coco_string_create(L"invalid COLOR"); break;
+			case 83: s = coco_string_create(L"invalid AVANZA"); break;
 
 		default:
 		{

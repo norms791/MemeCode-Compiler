@@ -421,47 +421,47 @@ Scanner::~Scanner() {
 void Scanner::Init() {
 	EOL    = '\n';
 	eofSym = 0;
-	maxT = 72;
-	noSym = 72;
+	maxT = 70;
+	noSym = 70;
 	int i;
 	for (i = 48; i <= 57; ++i) start.set(i, 12);
 	for (i = 65; i <= 90; ++i) start.set(i, 11);
-	start.set(116, 221);
-	start.set(102, 222);
+	start.set(116, 217);
+	start.set(102, 218);
 	start.set(34, 9);
-	start.set(112, 223);
+	start.set(112, 219);
 	start.set(123, 21);
 	start.set(125, 22);
 	start.set(111, 23);
 	start.set(58, 30);
-	start.set(114, 224);
+	start.set(114, 220);
 	start.set(40, 34);
 	start.set(41, 35);
 	start.set(44, 43);
 	start.set(59, 44);
-	start.set(105, 225);
-	start.set(108, 226);
-	start.set(99, 227);
-	start.set(118, 228);
-	start.set(91, 66);
-	start.set(93, 67);
-	start.set(61, 229);
-	start.set(101, 230);
-	start.set(42, 75);
-	start.set(47, 76);
-	start.set(100, 231);
-	start.set(43, 84);
-	start.set(45, 85);
-	start.set(60, 232);
-	start.set(62, 86);
-	start.set(38, 89);
-	start.set(124, 90);
-	start.set(110, 233);
-	start.set(97, 234);
-	start.set(109, 235);
-	start.set(98, 141);
-	start.set(115, 236);
-	start.set(103, 237);
+	start.set(105, 221);
+	start.set(118, 222);
+	start.set(91, 56);
+	start.set(93, 57);
+	start.set(61, 223);
+	start.set(108, 224);
+	start.set(101, 225);
+	start.set(42, 70);
+	start.set(47, 71);
+	start.set(100, 226);
+	start.set(43, 79);
+	start.set(45, 80);
+	start.set(60, 227);
+	start.set(62, 81);
+	start.set(38, 84);
+	start.set(124, 85);
+	start.set(110, 228);
+	start.set(97, 229);
+	start.set(99, 230);
+	start.set(109, 231);
+	start.set(98, 137);
+	start.set(115, 232);
+	start.set(103, 233);
 		start.set(Buffer::EoF, -1);
 
 
@@ -845,130 +845,130 @@ Token* Scanner::NextToken() {
 			{t->kind = 18; break;}
 		case 54:
 			case_54:
-			if (ch == L's') {AddCh(); goto case_55;}
+			if (ch == L'r') {AddCh(); goto case_55;}
 			else {goto case_0;}
 		case 55:
 			case_55:
-			if (ch == L't') {AddCh(); goto case_56;}
-			else {goto case_0;}
-		case 56:
-			case_56:
-			if (ch == L'a') {AddCh(); goto case_57;}
-			else {goto case_0;}
-		case 57:
-			case_57:
 			{t->kind = 19; break;}
+		case 56:
+			{t->kind = 20; break;}
+		case 57:
+			{t->kind = 21; break;}
 		case 58:
 			case_58:
-			{t->kind = 20; break;}
+			if (ch == L'r') {AddCh(); goto case_59;}
+			else {goto case_0;}
 		case 59:
 			case_59:
-			if (ch == L'r') {AddCh(); goto case_60;}
+			if (ch == L'e') {AddCh(); goto case_60;}
 			else {goto case_0;}
 		case 60:
 			case_60:
-			{t->kind = 21; break;}
+			if (ch == L's') {AddCh(); goto case_61;}
+			else {goto case_0;}
 		case 61:
 			case_61:
-			if (ch == L'r') {AddCh(); goto case_62;}
+			if (ch == L'a') {AddCh(); goto case_62;}
 			else {goto case_0;}
 		case 62:
 			case_62:
-			if (ch == L'e') {AddCh(); goto case_63;}
-			else {goto case_0;}
+			{t->kind = 22; break;}
 		case 63:
 			case_63:
-			if (ch == L's') {AddCh(); goto case_64;}
+			if (ch == L'e') {AddCh(); goto case_64;}
 			else {goto case_0;}
 		case 64:
 			case_64:
-			if (ch == L'a') {AddCh(); goto case_65;}
-			else {goto case_0;}
+			{t->kind = 24; break;}
 		case 65:
 			case_65:
-			{t->kind = 22; break;}
+			if (ch == L'a') {AddCh(); goto case_66;}
+			else {goto case_0;}
 		case 66:
-			{t->kind = 23; break;}
+			case_66:
+			if (ch == L'l') {AddCh(); goto case_67;}
+			else {goto case_0;}
 		case 67:
-			{t->kind = 24; break;}
+			case_67:
+			if (ch == L'u') {AddCh(); goto case_68;}
+			else {goto case_0;}
 		case 68:
 			case_68:
-			if (ch == L'e') {AddCh(); goto case_69;}
+			if (ch == L'a') {AddCh(); goto case_69;}
 			else {goto case_0;}
 		case 69:
 			case_69:
-			{t->kind = 26; break;}
+			{t->kind = 25; break;}
 		case 70:
-			case_70:
-			if (ch == L'a') {AddCh(); goto case_71;}
-			else {goto case_0;}
+			{t->kind = 26; break;}
 		case 71:
-			case_71:
-			if (ch == L'l') {AddCh(); goto case_72;}
-			else {goto case_0;}
+			{t->kind = 27; break;}
 		case 72:
 			case_72:
-			if (ch == L'u') {AddCh(); goto case_73;}
+			if (ch == L't') {AddCh(); goto case_73;}
 			else {goto case_0;}
 		case 73:
 			case_73:
-			if (ch == L'a') {AddCh(); goto case_74;}
-			else {goto case_0;}
+			{t->kind = 28; break;}
 		case 74:
 			case_74:
-			{t->kind = 27; break;}
+			if (ch == L'a') {AddCh(); goto case_75;}
+			else {goto case_0;}
 		case 75:
-			{t->kind = 28; break;}
-		case 76:
+			case_75:
 			{t->kind = 29; break;}
+		case 76:
+			case_76:
+			{t->kind = 30; break;}
 		case 77:
 			case_77:
-			if (ch == L't') {AddCh(); goto case_78;}
+			if (ch == L'g') {AddCh(); goto case_78;}
 			else {goto case_0;}
 		case 78:
 			case_78:
-			{t->kind = 30; break;}
-		case 79:
-			case_79:
-			if (ch == L'a') {AddCh(); goto case_80;}
-			else {goto case_0;}
-		case 80:
-			case_80:
 			{t->kind = 31; break;}
-		case 81:
-			case_81:
+		case 79:
 			{t->kind = 32; break;}
+		case 80:
+			{t->kind = 33; break;}
+		case 81:
+			{t->kind = 35; break;}
 		case 82:
 			case_82:
-			if (ch == L'g') {AddCh(); goto case_83;}
-			else {goto case_0;}
+			{t->kind = 36; break;}
 		case 83:
 			case_83:
-			{t->kind = 33; break;}
-		case 84:
-			{t->kind = 34; break;}
-		case 85:
-			{t->kind = 35; break;}
-		case 86:
 			{t->kind = 37; break;}
+		case 84:
+			{t->kind = 38; break;}
+		case 85:
+			{t->kind = 39; break;}
+		case 86:
+			case_86:
+			if (ch == L'g') {AddCh(); goto case_87;}
+			else {goto case_0;}
 		case 87:
 			case_87:
-			{t->kind = 38; break;}
+			if (ch == L'r') {AddCh(); goto case_88;}
+			else {goto case_0;}
 		case 88:
 			case_88:
-			{t->kind = 39; break;}
+			if (ch == L'o') {AddCh(); goto case_89;}
+			else {goto case_0;}
 		case 89:
+			case_89:
 			{t->kind = 40; break;}
 		case 90:
-			{t->kind = 41; break;}
+			case_90:
+			if (ch == L'u') {AddCh(); goto case_91;}
+			else {goto case_0;}
 		case 91:
 			case_91:
-			if (ch == L'g') {AddCh(); goto case_92;}
+			if (ch == L'l') {AddCh(); goto case_92;}
 			else {goto case_0;}
 		case 92:
 			case_92:
-			if (ch == L'r') {AddCh(); goto case_93;}
-			else {goto case_0;}
+			{t->kind = 41; break;}
 		case 93:
 			case_93:
 			if (ch == L'o') {AddCh(); goto case_94;}
@@ -978,52 +978,52 @@ Token* Scanner::NextToken() {
 			{t->kind = 42; break;}
 		case 95:
 			case_95:
-			if (ch == L'u') {AddCh(); goto case_96;}
+			if (ch == L'a') {AddCh(); goto case_96;}
 			else {goto case_0;}
 		case 96:
 			case_96:
-			if (ch == L'l') {AddCh(); goto case_97;}
+			if (ch == L'r') {AddCh(); goto case_97;}
 			else {goto case_0;}
 		case 97:
 			case_97:
-			{t->kind = 43; break;}
+			if (ch == L'i') {AddCh(); goto case_98;}
+			else {goto case_0;}
 		case 98:
 			case_98:
-			if (ch == L'o') {AddCh(); goto case_99;}
+			if (ch == L'l') {AddCh(); goto case_99;}
 			else {goto case_0;}
 		case 99:
 			case_99:
-			{t->kind = 44; break;}
+			if (ch == L'l') {AddCh(); goto case_100;}
+			else {goto case_0;}
 		case 100:
 			case_100:
-			if (ch == L'a') {AddCh(); goto case_101;}
+			if (ch == L'o') {AddCh(); goto case_101;}
 			else {goto case_0;}
 		case 101:
 			case_101:
-			if (ch == L'r') {AddCh(); goto case_102;}
-			else {goto case_0;}
+			{t->kind = 43; break;}
 		case 102:
 			case_102:
-			if (ch == L'i') {AddCh(); goto case_103;}
+			if (ch == L'd') {AddCh(); goto case_103;}
 			else {goto case_0;}
 		case 103:
 			case_103:
-			if (ch == L'l') {AddCh(); goto case_104;}
+			if (ch == L'e') {AddCh(); goto case_104;}
 			else {goto case_0;}
 		case 104:
 			case_104:
-			if (ch == L'l') {AddCh(); goto case_105;}
-			else {goto case_0;}
+			{t->kind = 44; break;}
 		case 105:
 			case_105:
-			if (ch == L'o') {AddCh(); goto case_106;}
+			if (ch == L'a') {AddCh(); goto case_106;}
 			else {goto case_0;}
 		case 106:
 			case_106:
 			{t->kind = 45; break;}
 		case 107:
 			case_107:
-			if (ch == L'd') {AddCh(); goto case_108;}
+			if (ch == L'l') {AddCh(); goto case_108;}
 			else {goto case_0;}
 		case 108:
 			case_108:
@@ -1031,37 +1031,38 @@ Token* Scanner::NextToken() {
 			else {goto case_0;}
 		case 109:
 			case_109:
-			{t->kind = 46; break;}
+			if (ch == L's') {AddCh(); goto case_110;}
+			else {goto case_0;}
 		case 110:
 			case_110:
-			if (ch == L'a') {AddCh(); goto case_111;}
+			if (ch == L't') {AddCh(); goto case_111;}
 			else {goto case_0;}
 		case 111:
 			case_111:
-			{t->kind = 47; break;}
+			if (ch == L'e') {AddCh(); goto case_112;}
+			else {goto case_0;}
 		case 112:
 			case_112:
-			if (ch == L'l') {AddCh(); goto case_113;}
-			else {goto case_0;}
+			{t->kind = 46; break;}
 		case 113:
 			case_113:
-			if (ch == L'e') {AddCh(); goto case_114;}
+			if (ch == L'r') {AddCh(); goto case_114;}
 			else {goto case_0;}
 		case 114:
 			case_114:
-			if (ch == L's') {AddCh(); goto case_115;}
+			if (ch == L'a') {AddCh(); goto case_115;}
 			else {goto case_0;}
 		case 115:
 			case_115:
-			if (ch == L't') {AddCh(); goto case_116;}
+			if (ch == L'd') {AddCh(); goto case_116;}
 			else {goto case_0;}
 		case 116:
 			case_116:
-			if (ch == L'e') {AddCh(); goto case_117;}
+			if (ch == L'o') {AddCh(); goto case_117;}
 			else {goto case_0;}
 		case 117:
 			case_117:
-			{t->kind = 48; break;}
+			{t->kind = 47; break;}
 		case 118:
 			case_118:
 			if (ch == L'r') {AddCh(); goto case_119;}
@@ -1072,493 +1073,472 @@ Token* Scanner::NextToken() {
 			else {goto case_0;}
 		case 120:
 			case_120:
-			if (ch == L'd') {AddCh(); goto case_121;}
+			if (ch == L'n') {AddCh(); goto case_121;}
 			else {goto case_0;}
 		case 121:
 			case_121:
-			if (ch == L'o') {AddCh(); goto case_122;}
+			if (ch == L'j') {AddCh(); goto case_122;}
 			else {goto case_0;}
 		case 122:
 			case_122:
-			{t->kind = 49; break;}
+			if (ch == L'a') {AddCh(); goto case_123;}
+			else {goto case_0;}
 		case 123:
 			case_123:
-			if (ch == L'r') {AddCh(); goto case_124;}
-			else {goto case_0;}
+			{t->kind = 48; break;}
 		case 124:
 			case_124:
-			if (ch == L'a') {AddCh(); goto case_125;}
+			if (ch == L'u') {AddCh(); goto case_125;}
 			else {goto case_0;}
 		case 125:
 			case_125:
-			if (ch == L'n') {AddCh(); goto case_126;}
+			if (ch == L'm') {AddCh(); goto case_126;}
 			else {goto case_0;}
 		case 126:
 			case_126:
-			if (ch == L'j') {AddCh(); goto case_127;}
+			if (ch == L'a') {AddCh(); goto case_127;}
 			else {goto case_0;}
 		case 127:
 			case_127:
-			if (ch == L'a') {AddCh(); goto case_128;}
-			else {goto case_0;}
+			{t->kind = 49; break;}
 		case 128:
 			case_128:
-			{t->kind = 50; break;}
+			if (ch == L'l') {AddCh(); goto case_129;}
+			else {goto case_0;}
 		case 129:
 			case_129:
-			if (ch == L'u') {AddCh(); goto case_130;}
+			if (ch == L'o') {AddCh(); goto case_130;}
 			else {goto case_0;}
 		case 130:
 			case_130:
-			if (ch == L'm') {AddCh(); goto case_131;}
+			if (ch == L'r') {AddCh(); goto case_131;}
 			else {goto case_0;}
 		case 131:
 			case_131:
-			if (ch == L'a') {AddCh(); goto case_132;}
-			else {goto case_0;}
+			{t->kind = 50; break;}
 		case 132:
 			case_132:
-			{t->kind = 51; break;}
+			if (ch == L'm') {AddCh(); goto case_133;}
+			else {goto case_0;}
 		case 133:
 			case_133:
-			if (ch == L'o') {AddCh(); goto case_134;}
+			if (ch == L'a') {AddCh(); goto case_134;}
 			else {goto case_0;}
 		case 134:
 			case_134:
-			if (ch == L'r') {AddCh(); goto case_135;}
+			if (ch == 241) {AddCh(); goto case_135;}
 			else {goto case_0;}
 		case 135:
 			case_135:
-			{t->kind = 52; break;}
+			if (ch == L'o') {AddCh(); goto case_136;}
+			else {goto case_0;}
 		case 136:
 			case_136:
-			if (ch == L'm') {AddCh(); goto case_137;}
-			else {goto case_0;}
+			{t->kind = 51; break;}
 		case 137:
-			case_137:
-			if (ch == L'a') {AddCh(); goto case_138;}
+			if (ch == L'o') {AddCh(); goto case_138;}
 			else {goto case_0;}
 		case 138:
 			case_138:
-			if (ch == 241) {AddCh(); goto case_139;}
+			if (ch == L'r') {AddCh(); goto case_139;}
 			else {goto case_0;}
 		case 139:
 			case_139:
-			if (ch == L'o') {AddCh(); goto case_140;}
+			if (ch == L'r') {AddCh(); goto case_140;}
 			else {goto case_0;}
 		case 140:
 			case_140:
-			{t->kind = 53; break;}
-		case 141:
-			if (ch == L'o') {AddCh(); goto case_142;}
+			if (ch == L'a') {AddCh(); goto case_141;}
 			else {goto case_0;}
+		case 141:
+			case_141:
+			{t->kind = 52; break;}
 		case 142:
 			case_142:
 			if (ch == L'r') {AddCh(); goto case_143;}
 			else {goto case_0;}
 		case 143:
 			case_143:
-			if (ch == L'r') {AddCh(); goto case_144;}
+			if (ch == L'i') {AddCh(); goto case_144;}
 			else {goto case_0;}
 		case 144:
 			case_144:
-			if (ch == L'a') {AddCh(); goto case_145;}
+			if (ch == L'b') {AddCh(); goto case_145;}
 			else {goto case_0;}
 		case 145:
 			case_145:
-			{t->kind = 54; break;}
+			if (ch == L'a') {AddCh(); goto case_146;}
+			else {goto case_0;}
 		case 146:
 			case_146:
-			if (ch == L'r') {AddCh(); goto case_147;}
-			else {goto case_0;}
+			{t->kind = 53; break;}
 		case 147:
 			case_147:
-			if (ch == L'i') {AddCh(); goto case_148;}
+			if (ch == L'a') {AddCh(); goto case_148;}
 			else {goto case_0;}
 		case 148:
 			case_148:
-			if (ch == L'b') {AddCh(); goto case_149;}
+			if (ch == L'j') {AddCh(); goto case_149;}
 			else {goto case_0;}
 		case 149:
 			case_149:
-			if (ch == L'a') {AddCh(); goto case_150;}
+			if (ch == L'o') {AddCh(); goto case_150;}
 			else {goto case_0;}
 		case 150:
 			case_150:
-			{t->kind = 55; break;}
+			{t->kind = 54; break;}
 		case 151:
 			case_151:
-			if (ch == L'a') {AddCh(); goto case_152;}
+			if (ch == L'e') {AddCh(); goto case_152;}
 			else {goto case_0;}
 		case 152:
 			case_152:
-			if (ch == L'j') {AddCh(); goto case_153;}
+			if (ch == L't') {AddCh(); goto case_153;}
 			else {goto case_0;}
 		case 153:
 			case_153:
-			if (ch == L'o') {AddCh(); goto case_154;}
+			if (ch == L'i') {AddCh(); goto case_154;}
 			else {goto case_0;}
 		case 154:
 			case_154:
-			{t->kind = 56; break;}
+			if (ch == L'r') {AddCh(); goto case_155;}
+			else {goto case_0;}
 		case 155:
 			case_155:
-			if (ch == L'e') {AddCh(); goto case_156;}
-			else {goto case_0;}
+			{t->kind = 55; break;}
 		case 156:
 			case_156:
-			if (ch == L't') {AddCh(); goto case_157;}
+			if (ch == L'e') {AddCh(); goto case_157;}
 			else {goto case_0;}
 		case 157:
 			case_157:
-			if (ch == L'i') {AddCh(); goto case_158;}
+			if (ch == L's') {AddCh(); goto case_158;}
 			else {goto case_0;}
 		case 158:
 			case_158:
-			if (ch == L'r') {AddCh(); goto case_159;}
-			else {goto case_0;}
+			{t->kind = 56; break;}
 		case 159:
 			case_159:
-			{t->kind = 57; break;}
+			if (ch == L'e') {AddCh(); goto case_160;}
+			else {goto case_0;}
 		case 160:
 			case_160:
-			if (ch == L'e') {AddCh(); goto case_161;}
+			if (ch == L'n') {AddCh(); goto case_161;}
 			else {goto case_0;}
 		case 161:
 			case_161:
-			if (ch == L's') {AddCh(); goto case_162;}
+			if (ch == L't') {AddCh(); goto case_162;}
 			else {goto case_0;}
 		case 162:
 			case_162:
-			{t->kind = 58; break;}
+			if (ch == L'r') {AddCh(); goto case_163;}
+			else {goto case_0;}
 		case 163:
 			case_163:
-			if (ch == L'e') {AddCh(); goto case_164;}
+			if (ch == L'a') {AddCh(); goto case_164;}
 			else {goto case_0;}
 		case 164:
 			case_164:
-			if (ch == L'n') {AddCh(); goto case_165;}
+			if (ch == L's') {AddCh(); goto case_165;}
 			else {goto case_0;}
 		case 165:
 			case_165:
-			if (ch == L't') {AddCh(); goto case_166;}
-			else {goto case_0;}
+			{t->kind = 57; break;}
 		case 166:
 			case_166:
-			if (ch == L'r') {AddCh(); goto case_167;}
+			if (ch == L't') {AddCh(); goto case_167;}
 			else {goto case_0;}
 		case 167:
 			case_167:
-			if (ch == L'a') {AddCh(); goto case_168;}
+			if (ch == L'o') {AddCh(); goto case_168;}
 			else {goto case_0;}
 		case 168:
 			case_168:
-			if (ch == L's') {AddCh(); goto case_169;}
-			else {goto case_0;}
+			{t->kind = 58; break;}
 		case 169:
 			case_169:
-			{t->kind = 59; break;}
+			if (ch == L'n') {AddCh(); goto case_170;}
+			else {goto case_0;}
 		case 170:
 			case_170:
-			if (ch == L't') {AddCh(); goto case_171;}
+			if (ch == L'o') {AddCh(); goto case_171;}
 			else {goto case_0;}
 		case 171:
 			case_171:
-			if (ch == L'o') {AddCh(); goto case_172;}
-			else {goto case_0;}
+			{t->kind = 60; break;}
 		case 172:
 			case_172:
-			{t->kind = 60; break;}
+			if (ch == L'a') {AddCh(); goto case_173;}
+			else {goto case_0;}
 		case 173:
 			case_173:
 			if (ch == L'n') {AddCh(); goto case_174;}
 			else {goto case_0;}
 		case 174:
 			case_174:
-			if (ch == L'o') {AddCh(); goto case_175;}
+			if (ch == L'z') {AddCh(); goto case_175;}
 			else {goto case_0;}
 		case 175:
 			case_175:
-			{t->kind = 62; break;}
+			if (ch == L'a') {AddCh(); goto case_176;}
+			else {goto case_0;}
 		case 176:
 			case_176:
-			if (ch == L'a') {AddCh(); goto case_177;}
-			else {goto case_0;}
+			{t->kind = 61; break;}
 		case 177:
 			case_177:
-			if (ch == L'n') {AddCh(); goto case_178;}
+			if (ch == L'q') {AddCh(); goto case_178;}
 			else {goto case_0;}
 		case 178:
 			case_178:
-			if (ch == L'z') {AddCh(); goto case_179;}
+			if (ch == L'u') {AddCh(); goto case_179;}
 			else {goto case_0;}
 		case 179:
 			case_179:
-			if (ch == L'a') {AddCh(); goto case_180;}
+			if (ch == L'i') {AddCh(); goto case_180;}
 			else {goto case_0;}
 		case 180:
 			case_180:
-			{t->kind = 63; break;}
+			if (ch == L'e') {AddCh(); goto case_181;}
+			else {goto case_0;}
 		case 181:
 			case_181:
-			if (ch == L'q') {AddCh(); goto case_182;}
+			if (ch == L'r') {AddCh(); goto case_182;}
 			else {goto case_0;}
 		case 182:
 			case_182:
-			if (ch == L'u') {AddCh(); goto case_183;}
+			if (ch == L'd') {AddCh(); goto case_183;}
 			else {goto case_0;}
 		case 183:
 			case_183:
-			if (ch == L'i') {AddCh(); goto case_184;}
+			if (ch == L'a') {AddCh(); goto case_184;}
 			else {goto case_0;}
 		case 184:
 			case_184:
-			if (ch == L'e') {AddCh(); goto case_185;}
-			else {goto case_0;}
+			{t->kind = 62; break;}
 		case 185:
 			case_185:
-			if (ch == L'r') {AddCh(); goto case_186;}
+			if (ch == L'e') {AddCh(); goto case_186;}
 			else {goto case_0;}
 		case 186:
 			case_186:
-			if (ch == L'd') {AddCh(); goto case_187;}
+			if (ch == L'c') {AddCh(); goto case_187;}
 			else {goto case_0;}
 		case 187:
 			case_187:
-			if (ch == L'a') {AddCh(); goto case_188;}
+			if (ch == L'h') {AddCh(); goto case_188;}
 			else {goto case_0;}
 		case 188:
 			case_188:
-			{t->kind = 64; break;}
+			if (ch == L'a') {AddCh(); goto case_189;}
+			else {goto case_0;}
 		case 189:
 			case_189:
-			if (ch == L'e') {AddCh(); goto case_190;}
-			else {goto case_0;}
+			{t->kind = 63; break;}
 		case 190:
 			case_190:
-			if (ch == L'c') {AddCh(); goto case_191;}
+			if (ch == L's') {AddCh(); goto case_191;}
 			else {goto case_0;}
 		case 191:
 			case_191:
-			if (ch == L'h') {AddCh(); goto case_192;}
+			if (ch == L'o') {AddCh(); goto case_192;}
 			else {goto case_0;}
 		case 192:
 			case_192:
-			if (ch == L'a') {AddCh(); goto case_193;}
+			if (ch == L's') {AddCh(); goto case_193;}
 			else {goto case_0;}
 		case 193:
 			case_193:
-			{t->kind = 65; break;}
+			{t->kind = 64; break;}
 		case 194:
 			case_194:
-			if (ch == L's') {AddCh(); goto case_195;}
+			if (ch == L'r') {AddCh(); goto case_195;}
 			else {goto case_0;}
 		case 195:
 			case_195:
-			if (ch == L'o') {AddCh(); goto case_196;}
+			if (ch == L'a') {AddCh(); goto case_196;}
 			else {goto case_0;}
 		case 196:
 			case_196:
-			if (ch == L's') {AddCh(); goto case_197;}
-			else {goto case_0;}
+			{t->kind = 65; break;}
 		case 197:
 			case_197:
-			{t->kind = 66; break;}
+			if (ch == L'a') {AddCh(); goto case_198;}
+			else {goto case_0;}
 		case 198:
 			case_198:
-			if (ch == L'r') {AddCh(); goto case_199;}
+			if (ch == L'd') {AddCh(); goto case_199;}
 			else {goto case_0;}
 		case 199:
 			case_199:
-			if (ch == L'a') {AddCh(); goto case_200;}
+			if (ch == L'o') {AddCh(); goto case_200;}
 			else {goto case_0;}
 		case 200:
 			case_200:
-			{t->kind = 67; break;}
+			if (ch == L's') {AddCh(); goto case_201;}
+			else {goto case_0;}
 		case 201:
 			case_201:
-			if (ch == L'a') {AddCh(); goto case_202;}
-			else {goto case_0;}
+			{t->kind = 66; break;}
 		case 202:
 			case_202:
-			if (ch == L'd') {AddCh(); goto case_203;}
+			if (ch == L'p') {AddCh(); goto case_203;}
 			else {goto case_0;}
 		case 203:
 			case_203:
-			if (ch == L'o') {AddCh(); goto case_204;}
+			if (ch == L'e') {AddCh(); goto case_204;}
 			else {goto case_0;}
 		case 204:
 			case_204:
-			if (ch == L's') {AddCh(); goto case_205;}
+			if (ch == L'r') {AddCh(); goto case_205;}
 			else {goto case_0;}
 		case 205:
 			case_205:
-			{t->kind = 68; break;}
+			if (ch == L'a') {AddCh(); goto case_206;}
+			else {goto case_0;}
 		case 206:
 			case_206:
-			if (ch == L'p') {AddCh(); goto case_207;}
-			else {goto case_0;}
+			{t->kind = 67; break;}
 		case 207:
 			case_207:
-			if (ch == L'e') {AddCh(); goto case_208;}
+			if (ch == L'g') {AddCh(); goto case_208;}
 			else {goto case_0;}
 		case 208:
 			case_208:
-			if (ch == L'r') {AddCh(); goto case_209;}
+			if (ch == L'u') {AddCh(); goto case_209;}
 			else {goto case_0;}
 		case 209:
 			case_209:
-			if (ch == L'a') {AddCh(); goto case_210;}
+			if (ch == L'n') {AddCh(); goto case_210;}
 			else {goto case_0;}
 		case 210:
 			case_210:
-			{t->kind = 69; break;}
+			if (ch == L'd') {AddCh(); goto case_211;}
+			else {goto case_0;}
 		case 211:
 			case_211:
-			if (ch == L'g') {AddCh(); goto case_212;}
+			if (ch == L'o') {AddCh(); goto case_212;}
 			else {goto case_0;}
 		case 212:
 			case_212:
-			if (ch == L'u') {AddCh(); goto case_213;}
+			if (ch == L's') {AddCh(); goto case_213;}
 			else {goto case_0;}
 		case 213:
 			case_213:
-			if (ch == L'n') {AddCh(); goto case_214;}
-			else {goto case_0;}
+			{t->kind = 68; break;}
 		case 214:
 			case_214:
-			if (ch == L'd') {AddCh(); goto case_215;}
+			if (ch == L'm') {AddCh(); goto case_215;}
 			else {goto case_0;}
 		case 215:
 			case_215:
-			if (ch == L'o') {AddCh(); goto case_216;}
+			if (ch == L'e') {AddCh(); goto case_216;}
 			else {goto case_0;}
 		case 216:
 			case_216:
-			if (ch == L's') {AddCh(); goto case_217;}
-			else {goto case_0;}
+			{t->kind = 69; break;}
 		case 217:
-			case_217:
-			{t->kind = 70; break;}
-		case 218:
-			case_218:
-			if (ch == L'm') {AddCh(); goto case_219;}
-			else {goto case_0;}
-		case 219:
-			case_219:
-			if (ch == L'e') {AddCh(); goto case_220;}
-			else {goto case_0;}
-		case 220:
-			case_220:
-			{t->kind = 71; break;}
-		case 221:
 			if (ch == L'r') {AddCh(); goto case_3;}
-			else if (ch == L'a') {AddCh(); goto case_136;}
+			else if (ch == L'a') {AddCh(); goto case_132;}
 			else {goto case_0;}
-		case 222:
+		case 218:
 			if (ch == L'a') {AddCh(); goto case_5;}
 			else if (ch == L'u') {AddCh(); goto case_51;}
-			else if (ch == L'r') {AddCh(); goto case_79;}
+			else if (ch == L'r') {AddCh(); goto case_74;}
 			else {goto case_0;}
-		case 223:
+		case 219:
 			if (ch == L'r') {AddCh(); goto case_14;}
 			else if (ch == L'o') {AddCh(); goto case_36;}
-			else if (ch == L'l') {AddCh(); goto case_129;}
-			else if (ch == L'a') {AddCh(); goto case_194;}
+			else if (ch == L'l') {AddCh(); goto case_124;}
+			else if (ch == L'a') {AddCh(); goto case_190;}
 			else {goto case_0;}
-		case 224:
+		case 220:
 			if (ch == L'a') {AddCh(); goto case_31;}
-			else if (ch == L'e') {AddCh(); goto case_238;}
-			else if (ch == L'o') {AddCh(); goto case_239;}
+			else if (ch == L'e') {AddCh(); goto case_234;}
+			else if (ch == L'o') {AddCh(); goto case_235;}
+			else {goto case_0;}
+		case 221:
+			if (ch == L'm') {AddCh(); goto case_45;}
+			else if (ch == L'z') {AddCh(); goto case_177;}
+			else {goto case_0;}
+		case 222:
+			if (ch == L'a') {AddCh(); goto case_54;}
+			else if (ch == L'e') {AddCh(); goto case_236;}
+			else {goto case_0;}
+		case 223:
+			recEnd = pos; recKind = 23;
+			if (ch == L'=') {AddCh(); goto case_83;}
+			else {t->kind = 23; break;}
+		case 224:
+			if (ch == L'e') {AddCh(); goto case_63;}
+			else if (ch == L'o') {AddCh(); goto case_77;}
 			else {goto case_0;}
 		case 225:
-			if (ch == L'm') {AddCh(); goto case_45;}
-			else if (ch == L'z') {AddCh(); goto case_181;}
+			if (ch == L'v') {AddCh(); goto case_65;}
+			else if (ch == L'n') {AddCh(); goto case_72;}
+			else if (ch == L's') {AddCh(); goto case_202;}
 			else {goto case_0;}
 		case 226:
-			if (ch == L'i') {AddCh(); goto case_54;}
-			else if (ch == L'e') {AddCh(); goto case_68;}
-			else if (ch == L'o') {AddCh(); goto case_82;}
+			if (ch == L'e') {AddCh(); goto case_237;}
 			else {goto case_0;}
 		case 227:
-			if (ch == L'o') {AddCh(); goto case_240;}
-			else if (ch == L'e') {AddCh(); goto case_112;}
-			else {goto case_0;}
+			recEnd = pos; recKind = 34;
+			if (ch == L'>') {AddCh(); goto case_82;}
+			else {t->kind = 34; break;}
 		case 228:
-			if (ch == L'a') {AddCh(); goto case_59;}
-			else if (ch == L'e') {AddCh(); goto case_241;}
+			if (ch == L'e') {AddCh(); goto case_86;}
+			else if (ch == L'a') {AddCh(); goto case_118;}
 			else {goto case_0;}
 		case 229:
-			recEnd = pos; recKind = 25;
-			if (ch == L'=') {AddCh(); goto case_88;}
-			else {t->kind = 25; break;}
+			if (ch == L'z') {AddCh(); goto case_90;}
+			else if (ch == L'm') {AddCh(); goto case_95;}
+			else if (ch == L'r') {AddCh(); goto case_142;}
+			else if (ch == L'b') {AddCh(); goto case_147;}
+			else if (ch == L'l') {AddCh(); goto case_166;}
+			else if (ch == L'v') {AddCh(); goto case_172;}
+			else {goto case_0;}
 		case 230:
-			if (ch == L'v') {AddCh(); goto case_70;}
-			else if (ch == L'n') {AddCh(); goto case_77;}
-			else if (ch == L's') {AddCh(); goto case_206;}
+			if (ch == L'e') {AddCh(); goto case_107;}
+			else if (ch == L'o') {AddCh(); goto case_128;}
 			else {goto case_0;}
 		case 231:
-			if (ch == L'e') {AddCh(); goto case_242;}
+			if (ch == L'o') {AddCh(); goto case_113;}
+			else if (ch == L'i') {AddCh(); goto case_159;}
+			else if (ch == L'e') {AddCh(); goto case_214;}
 			else {goto case_0;}
 		case 232:
-			recEnd = pos; recKind = 36;
-			if (ch == L'>') {AddCh(); goto case_87;}
-			else {t->kind = 36; break;}
+			if (ch == L'i') {AddCh(); goto case_238;}
+			else if (ch == L'e') {AddCh(); goto case_207;}
+			else {goto case_0;}
 		case 233:
-			if (ch == L'e') {AddCh(); goto case_91;}
-			else if (ch == L'a') {AddCh(); goto case_123;}
+			if (ch == L'i') {AddCh(); goto case_194;}
+			else if (ch == L'r') {AddCh(); goto case_197;}
 			else {goto case_0;}
 		case 234:
-			if (ch == L'z') {AddCh(); goto case_95;}
-			else if (ch == L'm') {AddCh(); goto case_100;}
-			else if (ch == L'r') {AddCh(); goto case_146;}
-			else if (ch == L'b') {AddCh(); goto case_151;}
-			else if (ch == L'l') {AddCh(); goto case_170;}
-			else if (ch == L'v') {AddCh(); goto case_176;}
+			case_234:
+			if (ch == L'g') {AddCh(); goto case_58;}
+			else if (ch == L'p') {AddCh(); goto case_151;}
 			else {goto case_0;}
 		case 235:
-			if (ch == L'o') {AddCh(); goto case_118;}
-			else if (ch == L'i') {AddCh(); goto case_163;}
-			else if (ch == L'e') {AddCh(); goto case_218;}
+			case_235:
+			if (ch == L'j') {AddCh(); goto case_93;}
+			else if (ch == L's') {AddCh(); goto case_105;}
 			else {goto case_0;}
 		case 236:
-			if (ch == L'i') {AddCh(); goto case_243;}
-			else if (ch == L'e') {AddCh(); goto case_211;}
+			case_236:
+			if (ch == L'r') {AddCh(); goto case_102;}
+			else if (ch == L'c') {AddCh(); goto case_156;}
 			else {goto case_0;}
 		case 237:
-			if (ch == L'i') {AddCh(); goto case_198;}
-			else if (ch == L'r') {AddCh(); goto case_201;}
+			case_237:
+			if (ch == L'c') {AddCh(); goto case_76;}
+			else if (ch == L'r') {AddCh(); goto case_185;}
 			else {goto case_0;}
 		case 238:
 			case_238:
-			if (ch == L'g') {AddCh(); goto case_61;}
-			else if (ch == L'p') {AddCh(); goto case_155;}
-			else {goto case_0;}
-		case 239:
-			case_239:
-			if (ch == L'j') {AddCh(); goto case_98;}
-			else if (ch == L's') {AddCh(); goto case_110;}
-			else {goto case_0;}
-		case 240:
-			case_240:
-			if (ch == L'n') {AddCh(); goto case_58;}
-			else if (ch == L'l') {AddCh(); goto case_133;}
-			else {goto case_0;}
-		case 241:
-			case_241:
-			if (ch == L'r') {AddCh(); goto case_107;}
-			else if (ch == L'c') {AddCh(); goto case_160;}
-			else {goto case_0;}
-		case 242:
-			case_242:
-			if (ch == L'c') {AddCh(); goto case_81;}
-			else if (ch == L'r') {AddCh(); goto case_189;}
-			else {goto case_0;}
-		case 243:
-			case_243:
-			recEnd = pos; recKind = 61;
-			if (ch == L'_') {AddCh(); goto case_173;}
-			else {t->kind = 61; break;}
+			recEnd = pos; recKind = 59;
+			if (ch == L'_') {AddCh(); goto case_169;}
+			else {t->kind = 59; break;}
 
 	}
 	AppendVal(t);

@@ -164,13 +164,13 @@ class Procedure {
 			Variable *v = new Variable(name, type, dir, arr_length);
 			variables.push_back(v);
 			switch (type) {
-				case 1: num_ent ++;
+				case 1: num_ent += arr_length;
 					break;
-				case 2: num_fra ++;
+				case 2: num_fra += arr_length;
 					break;
-				case 3: num_log ++;
+				case 3: num_log += arr_length;
 					break;
-				case 4: num_dec ++;
+				case 4: num_dec += arr_length;
 					break;	
 			}
 			cout << "Add variable check out ";

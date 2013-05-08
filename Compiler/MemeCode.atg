@@ -148,7 +148,7 @@ COMPILER MemeCode
 	/*MODIFICAR LAS COSAS DE LOS ARREGLO LOS INDICES!!*/
 	void add_variable_array(wchar_t* name, int type, int arr_length){
 		Procedure *p = procs_dir.back();
-		int dir = get_var_dir(type, local_s);
+		int dir = get_arr_dir(type, local_s, arr_length);
 		p->add_var_arr(name, type, dir, arr_length);
 	}	
 	
@@ -195,6 +195,10 @@ COMPILER MemeCode
 						dir = GBL_DEC + COUNT_GBL_DEC;
 						COUNT_GBL_DEC++;
 					break;
+					case 5:
+						dir = GBL_DIR + COUNT_GBL_DIR;
+						COUNT_GBL_DIR++;
+					break;
 				}
 			break;
 			//Local Scope
@@ -215,6 +219,10 @@ COMPILER MemeCode
 					case 4:
 						dir = LCL_DEC + COUNT_LCL_DEC;
 						COUNT_LCL_DEC++;
+					break;
+					case 5:
+						dir = LCL_DIR + COUNT_LCL_DIR;
+						COUNT_LCL_DIR++;
 					break;
 				}	
 			break;
@@ -237,6 +245,10 @@ COMPILER MemeCode
 						dir = TMP_DEC + COUNT_TMP_DEC;
 						COUNT_TMP_DEC++;
 					break;
+					case 5:
+						dir = TMP_DIR + COUNT_TMP_DIR;
+						COUNT_TMP_DIR++;
+					break;
 				}
 			break;
 			//Constant Scope
@@ -257,6 +269,102 @@ COMPILER MemeCode
 					case 4:
 						dir = CTE_DEC + COUNT_CTE_DEC;
 						COUNT_CTE_DEC++;
+					break;
+					case 5:
+						dir = CTE_DIR + COUNT_CTE_DIR;
+						COUNT_CTE_DIR++;
+					break;
+				}
+			break;
+		}
+		return dir;
+	}
+	
+	/*Function to set the direction a variable will have*/
+	int get_arr_dir(int type, int scope, int a_len){
+		int dir = 0;
+		switch(scope) {
+			//Global Scope
+			case 0: 
+				switch(type) {
+					case 1:
+						dir = GBL_ENT + COUNT_GBL_ENT;
+						COUNT_GBL_ENT += a_len;
+					break;
+					case 2:
+						dir = GBL_FRA + COUNT_GBL_FRA;
+						COUNT_GBL_FRA += a_len;
+					break;
+					case 3:
+						dir = GBL_LOG + COUNT_GBL_LOG;
+						COUNT_GBL_LOG += a_len;
+					break;
+					case 4:
+						dir = GBL_DEC + COUNT_GBL_DEC;
+						COUNT_GBL_DEC += a_len;
+					break;
+				}
+			break;
+			//Local Scope
+			case 1:
+				switch(type) {
+					case 1:
+						dir = LCL_ENT + COUNT_LCL_ENT;
+						COUNT_LCL_ENT += a_len;
+					break;
+					case 2:
+						dir = LCL_FRA + COUNT_LCL_FRA;
+						COUNT_LCL_FRA += a_len;
+					break;
+					case 3:
+						dir = LCL_LOG + COUNT_LCL_LOG;
+						COUNT_LCL_LOG += a_len;
+					break;
+					case 4:
+						dir = LCL_DEC + COUNT_LCL_DEC;
+						COUNT_LCL_DEC += a_len;
+					break;
+				}	
+			break;
+			//Temporal scope
+			case 2:
+				switch(type) {
+					case 1:
+						dir = TMP_ENT + COUNT_TMP_ENT;
+						COUNT_TMP_ENT += a_len;
+					break;
+					case 2:
+						dir = TMP_FRA + COUNT_TMP_FRA;
+						COUNT_TMP_FRA += a_len;
+					break;
+					case 3:
+						dir = TMP_LOG + COUNT_TMP_LOG;
+						COUNT_TMP_LOG += a_len;
+					break;
+					case 4:
+						dir = TMP_DEC + COUNT_TMP_DEC;
+						COUNT_TMP_DEC += a_len;
+					break;
+				}
+			break;
+			//Constant Scope
+			case 3:
+				switch(type) {
+					case 1:
+						dir = CTE_ENT + COUNT_CTE_ENT;
+						COUNT_CTE_ENT += a_len;
+					break;
+					case 2:
+						dir = CTE_FRA + COUNT_CTE_FRA;
+						COUNT_CTE_FRA += a_len;
+					break;
+					case 3:
+						dir = CTE_LOG + COUNT_CTE_LOG;
+						COUNT_CTE_LOG += a_len;
+					break;
+					case 4:
+						dir = CTE_DEC + COUNT_CTE_DEC;
+						COUNT_CTE_DEC += a_len;
 					break;
 				}
 			break;
@@ -454,15 +562,26 @@ MATH =
 	"raiz"
 	"("				(. int value1; .)
 	ent				(. swscanf(t->val, L"%d", &value1); .)
-	")"				(. create_quadruple(RAIZ, value1, -1, -1);.)
+	
+	")"				(. 
+						/*Asignar una variable flotante a la raiz*/
+						int dir_raiz = get_var_dir(dec, temporal_s);
+						create_quadruple(RAIZ, value1, -1, dir_raiz);
+						/*Meter la direccion a la pila de operadores y el tipo a la pila de tipos*/
+						pOp.push(dir_raiz);
+						pTipos.push(dec);
+					.)
 	)
 	|(
-	"potencia"
+	"potencia"		(. int dir_pot = get_var_dir(dec, temporal_s); .)
 	"("				(. int value1; int value2; .)
 	ent				(. swscanf(t->val, L"%d", &value1); .)
 	","
 	ent				(. swscanf(t->val, L"%d", &value2); .)
-	")"				(. create_quadruple(POTENCIA, value1, value2, -1);.)
+	")"				(. create_quadruple(POTENCIA, value1, value2, dir_pot);
+						pOp.push(dir_pot);
+						pTipos.push(dec);
+					.)
 	)
 	";".	
 /******************************************************************/	
@@ -560,30 +679,42 @@ DECLARACIONMETODO = 	(. cout << "Check in declaracion metodo ";
 						.).
 /****************************************************************/
 DECLARACION =			(. cout << "Check in declaracion variable ";
-							int is_array; wchar_t* name; int type; 
+							int is_array; wchar_t* name; int type; int arr_length;
 							is_array = 0;	
 						.)
-						(. int arr_length; .)
-     [
-     "lista"			(. is_array = 1; .)
-     "con"				
-     ent				(. swscanf(t->val, L"%d", &arr_length); .)
-     ]
-     "var"				
-     TIPO<type>
-     Ident<name>		(. cout << endl << "Add a new variable " << endl;
-							if(is_array == 1) { 
-								is_array = 0;
-								add_variable_array(name, type, arr_length);	
-							} else {	
-								add_variable(name, type);
-							} 
+	"var"				
+	TIPO<type>
+	Ident<name>
+	[
+	"["					(. is_array = 1; .)
+	ent					(. swscanf(t->val, L"%d", &arr_length); .)
+	"]"
+	]
+						(.
+						if(is_array == 1) { 
+							is_array = 0;
+							add_variable_array(name, type, arr_length);	
+						} else {	
+							add_variable(name, type);
+						} 
 						.)
      {
      ","
-    Ident<name>			(. cout << "Add a new variable 2";
-							add_variable(name, type); .)
-     }
+    Ident<name>			(. is_array = 0; .)
+    [
+	"["					(. is_array = 1; .)
+	ent					(. swscanf(t->val, L"%d", &arr_length); .)
+	"]"
+	] 
+						(. 
+						if(is_array == 1) { 
+							is_array = 0;
+							add_variable_array(name, type, arr_length);	
+						} else {	
+							add_variable(name, type);
+						}  
+						.)
+	 }
      ";".
 /*******************************************************************/	 
 RETORNO = 
@@ -599,18 +730,19 @@ RETORNO =
 	")" 
 	";".
 /*******************************************************************/
-ASIGLEC = 				(. wchar_t* name; .)
+ASIGLEC = 				(. wchar_t* name; int is_array; int arr_length;.)
 	Ident<name> 		(.
 							/*Buscamos la variable en el directorio de procedimientos local, si no la encontramos en el local, hay que buscarla en el global*/
-							int dir = 0;
+							int dir_var = 0;
 							Procedure *p = procs_dir.back();
 							if(p->variables.size() > 0){
 								for(int i = 0; i < p->variables.size(); i++ ){
 									Variable * var = p->variables[i];
 									if(coco_string_equal(var->name, name)){
 										/*Meter la direccion encontrada en la pila de operadores*/
-										dir = var->dir;
-										//pOp.push(dir);
+										dir_var = var->dir;
+										is_array = var->is_array;
+										arr_length = var->arr_length;
 									} 
 								}
 							} else if (p->params.size() > 0) {
@@ -618,21 +750,23 @@ ASIGLEC = 				(. wchar_t* name; .)
 									Variable * var = p->params[i];
 									if(coco_string_equal(var->name, name)){
 										/*Meter la direccion encontrada en la pila de operadores*/
-										dir = var->dir;
-										//pOp.push(dir);
+										dir_var = var->dir;
+										is_array = var->is_array;
+										arr_length = var->arr_length;
 									} 
 								}
 							}
 							/*Buscarla en la memoria global*/
-							if(dir == 0) {
+							if(dir_var == 0) {
 								Procedure * pg = procs_dir[0];
 								if(pg->variables.size() > 0){
 									for(int i = 0; i < pg->variables.size(); i++ ){
 										Variable * var = pg->variables[i];
 										if(coco_string_equal(var->name, name)){
 											/*Meter la direccion encontrada en la pila de operadores*/
-											dir = var->dir;
-											//pOp.push(dir);
+											dir_var = var->dir;
+											is_array = var->is_array;
+											arr_length = var->arr_length;
 										} else if (i == pg->variables.size() -1){
 											/*NO EXISTE =( */
 											Err(L"La variable a la que le quieres asignar el valor no existe");
@@ -647,28 +781,64 @@ ASIGLEC = 				(. wchar_t* name; .)
 							}
 						.)
 	[
-	"[" 
-	EXP					
+	"["					 
+	EXP					(.
+						if(is_array == 0) {
+							Err(L"La variable a la que quieres asignar contenido no es un arreglo");
+							exit(1);
+						}
+						.)	
 	"]"] 
-	"=" 				(. int dirTo;.)
+	"=" 				(. int dir_exp;.)
 	(LECTURA			(. 
-						/* Cuadruplo para la asgnacion */
-						dirTo = pOp.top();
+						int dir_lectura;
+						dir_lectura = pOp.top();
 						pOp.pop();
-						create_quadruple(ASIG, dirTo, -1, dir);	
+						if (is_array == 0) {
+							/* Cuadruplo para la asgnacion */
+							create_quadruple(ASIG, dir_lectura, -1, dir_var);	
+						} else {
+							/*Generar los cuaduplos para los arreglos*/
+							dir_exp = pOp.top();
+							pOp.pop();
+							int dir_dir = (5, temporal_s);
+							create_quadruple(VERIF, dir_exp, arr_length, -1);
+							create_quadruple(ADD, dir_var, dir_exp, dir_dir);
+							create_quadruple(ASIG, dir_lectura, -1,  dir_dir);
+						}
 						.)	
 	| ASIGNA			(. 
-						/* Cuadruplo para la asgnacion */
-						dirTo = pOp.top();
+						int dir_asig;
+						dir_asig = pOp.top();
 						pOp.pop();
-						create_quadruple(ASIG, dirTo, -1, dir);	
+						if (is_array == 0) {
+							create_quadruple(ASIG, dir_asig, -1, dir_var);	
+						} else {
+							/*Generar los cuaduplos para los arreglos*/
+							dir_exp = pOp.top();
+							pOp.pop();
+							int dir_dir = (5, temporal_s);
+							create_quadruple(VERIF, dir_exp, arr_length, -1);
+							create_quadruple(ADD, dir_var, dir_exp, dir_dir);
+							create_quadruple(ASIG, dir_asig, -1,  dir_dir);
+						}
 						.)	
 	| MATH
 						(. 
-						/* Cuadruplo para la asgnacion */
-						dirTo = pOp.top();
+						int dir_math;
+						dir_math = pOp.top();
 						pOp.pop();
-						create_quadruple(ASIG, dirTo, -1, dir);	
+						if (is_array == 0 ){
+							create_quadruple(ASIG, dir_math, -1, dir_var);	
+						} else {
+							/*Generar los cuaduplos para los arreglos*/
+							dir_exp = pOp.top();
+							pOp.pop();
+							int dir_dir = (5, temporal_s);
+							create_quadruple(VERIF, dir_exp, arr_length, -1);
+							create_quadruple(ADD, dir_var, dir_exp, dir_dir);
+							create_quadruple(ASIG, dir_math, -1,  dir_dir);
+						}	
 						.)
 	).
 /*******************************************************************/	
@@ -1153,7 +1323,7 @@ PLUMA =
 CICLO = 
 	("repetir" 			(.
 						/*Paso 1 para ciclos*/
-						pSaltos.push(program_counter);
+						pSaltos.push(program_counter + 1);
 						.)
 	EXP "veces" 		(.
 						/*Paso 2 para ciclos*/

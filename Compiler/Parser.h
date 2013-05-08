@@ -197,7 +197,7 @@ int COUNT_GBL_ENT;
 	/*MODIFICAR LAS COSAS DE LOS ARREGLO LOS INDICES!!*/
 	void add_variable_array(wchar_t* name, int type, int arr_length){
 		Procedure *p = procs_dir.back();
-		int dir = get_var_dir(type, local_s);
+		int dir = get_arr_dir(type, local_s, arr_length);
 		p->add_var_arr(name, type, dir, arr_length);
 	}	
 	
@@ -244,6 +244,10 @@ int COUNT_GBL_ENT;
 						dir = GBL_DEC + COUNT_GBL_DEC;
 						COUNT_GBL_DEC++;
 					break;
+					case 5:
+						dir = GBL_DIR + COUNT_GBL_DIR;
+						COUNT_GBL_DIR++;
+					break;
 				}
 			break;
 			//Local Scope
@@ -264,6 +268,10 @@ int COUNT_GBL_ENT;
 					case 4:
 						dir = LCL_DEC + COUNT_LCL_DEC;
 						COUNT_LCL_DEC++;
+					break;
+					case 5:
+						dir = LCL_DIR + COUNT_LCL_DIR;
+						COUNT_LCL_DIR++;
 					break;
 				}	
 			break;
@@ -286,6 +294,10 @@ int COUNT_GBL_ENT;
 						dir = TMP_DEC + COUNT_TMP_DEC;
 						COUNT_TMP_DEC++;
 					break;
+					case 5:
+						dir = TMP_DIR + COUNT_TMP_DIR;
+						COUNT_TMP_DIR++;
+					break;
 				}
 			break;
 			//Constant Scope
@@ -306,6 +318,102 @@ int COUNT_GBL_ENT;
 					case 4:
 						dir = CTE_DEC + COUNT_CTE_DEC;
 						COUNT_CTE_DEC++;
+					break;
+					case 5:
+						dir = CTE_DIR + COUNT_CTE_DIR;
+						COUNT_CTE_DIR++;
+					break;
+				}
+			break;
+		}
+		return dir;
+	}
+	
+	/*Function to set the direction a variable will have*/
+	int get_arr_dir(int type, int scope, int a_len){
+		int dir = 0;
+		switch(scope) {
+			//Global Scope
+			case 0: 
+				switch(type) {
+					case 1:
+						dir = GBL_ENT + COUNT_GBL_ENT;
+						COUNT_GBL_ENT += a_len;
+					break;
+					case 2:
+						dir = GBL_FRA + COUNT_GBL_FRA;
+						COUNT_GBL_FRA += a_len;
+					break;
+					case 3:
+						dir = GBL_LOG + COUNT_GBL_LOG;
+						COUNT_GBL_LOG += a_len;
+					break;
+					case 4:
+						dir = GBL_DEC + COUNT_GBL_DEC;
+						COUNT_GBL_DEC += a_len;
+					break;
+				}
+			break;
+			//Local Scope
+			case 1:
+				switch(type) {
+					case 1:
+						dir = LCL_ENT + COUNT_LCL_ENT;
+						COUNT_LCL_ENT += a_len;
+					break;
+					case 2:
+						dir = LCL_FRA + COUNT_LCL_FRA;
+						COUNT_LCL_FRA += a_len;
+					break;
+					case 3:
+						dir = LCL_LOG + COUNT_LCL_LOG;
+						COUNT_LCL_LOG += a_len;
+					break;
+					case 4:
+						dir = LCL_DEC + COUNT_LCL_DEC;
+						COUNT_LCL_DEC += a_len;
+					break;
+				}	
+			break;
+			//Temporal scope
+			case 2:
+				switch(type) {
+					case 1:
+						dir = TMP_ENT + COUNT_TMP_ENT;
+						COUNT_TMP_ENT += a_len;
+					break;
+					case 2:
+						dir = TMP_FRA + COUNT_TMP_FRA;
+						COUNT_TMP_FRA += a_len;
+					break;
+					case 3:
+						dir = TMP_LOG + COUNT_TMP_LOG;
+						COUNT_TMP_LOG += a_len;
+					break;
+					case 4:
+						dir = TMP_DEC + COUNT_TMP_DEC;
+						COUNT_TMP_DEC += a_len;
+					break;
+				}
+			break;
+			//Constant Scope
+			case 3:
+				switch(type) {
+					case 1:
+						dir = CTE_ENT + COUNT_CTE_ENT;
+						COUNT_CTE_ENT += a_len;
+					break;
+					case 2:
+						dir = CTE_FRA + COUNT_CTE_FRA;
+						COUNT_CTE_FRA += a_len;
+					break;
+					case 3:
+						dir = CTE_LOG + COUNT_CTE_LOG;
+						COUNT_CTE_LOG += a_len;
+					break;
+					case 4:
+						dir = CTE_DEC + COUNT_CTE_DEC;
+						COUNT_CTE_DEC += a_len;
 					break;
 				}
 			break;
